@@ -3,17 +3,20 @@
 ## Group Members:
 
 Alex Shao
+
 Daniel Yang
+
 Owen Zeng
        
 # Intentions:
 
-Injecting malicious code into the empty padding between sections of an ELF file, and then changing the entry point of the process to the malicious code.
+Injecting malicious code into the empty padding between sections of an ELF file, and then changing the entry point of the process to the malicious code.  
+After doing so, move entry point back to original entry code to prevent suspicion.
 
     
 # Intended usage:
 
-A description as to how the project will be used (describe the user interface). (CHANGE THIS!!!!!)
+We will create a CLI that you can compile and use flags to pass in different binaries that can be injected to the target binary.
   
 # Technical Details:
 
