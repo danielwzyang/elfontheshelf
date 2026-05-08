@@ -2,11 +2,14 @@
 
 ## Group Members:
 
-names here.(CHANGE THIS!!!!!)
+Alex Shao
+Daniel Yang
+Owen Zeng
        
 # Intentions:
 
-A statement of the problem you are solving and/or a high level description of the project. (CHANGE THIS!!!!!)
+Injecting malicious code into the empty padding between sections of an ELF file, and then changing the entry point of the process to the malicious code.
+
     
 # Intended usage:
 
