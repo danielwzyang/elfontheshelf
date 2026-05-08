@@ -16,8 +16,10 @@ How does the user interact with this program? (CHANGE THIS!!!!!)
 
 ### Resources/ References:
 
----WIP---
-
 http://ouah.org/elf-pv.txt
 
-[![ouah.org](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/B2vtqcJe)
+https://hckng.org/~isra/articles/house-of-pain.html
+
+https://www.man7.org/linux/man-pages/man5/elf.5.html
+
+[![assignment due date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/B2vtqcJe)
