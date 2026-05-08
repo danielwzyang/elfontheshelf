@@ -6,8 +6,8 @@ Alex Shao, Daniel Yang, Owen Zeng
 
 ### Project Description:
 
-ELF injection: 
-  
+Executable binaries can be stored in a format known as ELF.
+You can exploit the way that the binary is organized to inject malicious code into zeroed out bytes that aren't used.
 
 ### Instructions:
 
