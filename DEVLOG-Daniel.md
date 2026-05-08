@@ -6,5 +6,5 @@ This document must be updated daily every time you finish a work session.
 
 ### 2026-05-08: Start of Project
 I worked on setting up the devlog files and editing the README.
-I also continued to look for references.
+I also set up the working dirs and continued to look for references.
 
