@@ -2,10 +2,11 @@
 
 This document must be updated daily every time you finish a work session.
 
-## Amy Smith CHANGE THE NAME FOOL!
+## Alex Shao
 
-### 2024-01-02 - Brief description
-Expanded description including how much time was spent on task.
+### 2026-05-08 - README & Group Project Name
+- Discussed project dynamics
+- Started README
 
-### 2024-01-03 - Brief description
-Expanded description including how much time was spent on task.
+
+
