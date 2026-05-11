@@ -10,9 +10,9 @@ _start:
     test rax, rax ; check if rax is 0
     jnz hello ; if pid isn't 0 then we are the parent so let's print hello
 
-    ; execve("/bin/bash", null, null)
+    ; execve(file, null, null)
     mov rax, 59 ; sys_execve = 59
-    lea rdi, [rel filename]
+    lea rdi, [rel path]
     xor rsi, rsi ; null argv
     xor rdx, rdx ; null envp
     syscall
@@ -31,5 +31,5 @@ hello:
 text:
     db "Hello world!", 0Ah
 
-filename:
-    db "/usr/bin/yes", 0
+path:
+    db "/usr/bin/ls", 0
