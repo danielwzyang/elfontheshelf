@@ -10,5 +10,5 @@ I also set up the working dirs and continued to look for references.
 
 ### 2026-05-10: Learning Some Assembly
 I worked on learning a bit of NASM and figuring out how to use syscalls as that's the primary thing our payload will be doing.
-I also added my source to the references and made a basic hello world program with some notes
+I also added my source to the references and made basic hello world and read file programs with some notes.
 

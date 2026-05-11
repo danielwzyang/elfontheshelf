@@ -12,9 +12,9 @@ _start:
     mov rdx, 13 ; count is 13 bytes
     syscall ; will use the registers above to run a certain syscall
 
-    mov rax, 60 ; code for exit
-    xor rdi, rdi ; set status to 0 and use xor bc it's faster than mov
-    syscall ; exit
+    ; look at read_file.asm for an explanation of the below
+    mov rax, 0xDEADBEEFDEADBEEF
+    jmp rax
 
 text:
     db "Hello world!", 0Ah ; define string and 0Ah is new line
