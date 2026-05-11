@@ -14,8 +14,8 @@ _start:
     xor rax, rax ; sys_read = 0
     sub rsp, 32 ; allocate 32 bytes to the stack
     mov rsi, rsp ; set the buffer to the stack
-    mov rdx, 32 ; allocated 32 bytes
-    syscall ; bytes read will be stored in rax
+    mov rdx, 32 ; count is 32 bytes
+    syscall ; number of bytes read will be stored in rax
 
     ; now we can write out the buffer
     mov rdx, rax ; move bytes read first 
