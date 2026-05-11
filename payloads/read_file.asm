@@ -24,8 +24,8 @@ _start:
     mov rsi, rsp ; buffer is stack again
     syscall 
 
-    ; it would be base (wherever ASLR puts the program) + original e_entry = actual address
     ; this dummy address would be replaced by the injector with the right address
+    ; the right address would be the original e_entry (for a no PIE binary)
     mov rax, 0xDEADBEEFDEADBEEF ; if you run this standalone it will segfault because deadbeef is unfortunately not a valid address
     jmp rax
 
