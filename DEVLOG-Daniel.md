@@ -12,3 +12,6 @@ I also set up the working dirs and continued to look for references.
 I worked on learning a bit of NASM and figuring out how to use syscalls as that's the primary thing our payload will be doing.
 I also added my source to the references and made basic hello world and read file programs with some notes.
 
+### 2026-05-11: .text extraction
+I figured out how to use nasm and objcopy to extract the bytes that will be injected into the ELF.
+I also made a makefile target to automate it.
