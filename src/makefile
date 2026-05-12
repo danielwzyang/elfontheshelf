@@ -6,7 +6,7 @@ OBJS = main.o
 FNAME = INJECTOR
 
 default: 
-	$(CC) -c -Wall $(CMPF)
-	$(CC) -Wall $(OBJS) -o $(FNAME)
-	rm -rf $(OBJS)
+	@$(CC) -c -Wall $(CMPF)
+	@$(CC) -Wall $(OBJS) -o $(FNAME)
+	@rm -rf $(OBJS)
 	
