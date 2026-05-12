@@ -3,12 +3,14 @@
 
 /* THE FIRST PART:
 	https://www.conradk.com/elf-from-scratch/
+	https://linuxvox.com/blog/reading-the-contents-of-an-elf-section-programmatically/
 	1. Read header
 
 
 
 */
-;
+
+
 int read_header(char *name){
 	int fp;
 	fp = open(name, O_RDONLY);
