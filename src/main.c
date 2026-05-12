@@ -1,11 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <elf.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include "structs.h"
 
-int main(void) {
-    return 0;
-}
+int main(void) { return 0; }
