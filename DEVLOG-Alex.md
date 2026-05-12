@@ -10,3 +10,7 @@ This document must be updated daily every time you finish a work session.
 
 
 
+### 2026-05-12 - README & Group Project Name
+- Worked on main elf infecter
+- created struct.h temporary file 
+
