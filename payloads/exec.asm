@@ -10,11 +10,16 @@ _start:
     test rax, rax ; check if rax is 0
     jnz hello ; if pid isn't 0 then we are the parent so let's print hello
 
-    ; execve(file, null, null)
-    mov rax, 59 ; sys_execve = 59
-    lea rdi, [rel path]
-    xor rsi, rsi ; null argv
+    ; execve(file, argv, null)
+    xor rax, rax ; set rax to 0
+    push rax ; stack now has NULL
+    lea rax, [rel flag]
+    push rax ; stack now has flag and NULL
+    lea rdi, [rel path] ; set path
+    push rdi ; stack has path, flag, and NULL
+    mov rsi, rsp
     xor rdx, rdx ; null envp
+    mov rax, 59 ; sys_execve = 59
     syscall
 
 ; read hello.asm
@@ -33,3 +38,7 @@ text:
 
 path:
     db "/usr/bin/ls", 0
+
+flag:
+    db "-lah", 0
+
