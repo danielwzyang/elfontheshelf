@@ -24,12 +24,12 @@ int read_elf(char *name){
 		file pointer		fp 	(int)
 		memory stats		inf	(struct stat)
 		memmory map			mm	(const char *)
-		|-> mmap exports file to string, with stats in inf
+		-> mmap exports file to string, with stats in inf
 	*/
 	int fp = open(name, O_RDONLY); 
 	struct stat inf;
 	if (fp < 0) 
-		nerror("Open elf", "Failed to open elf file", 1);
+		nerror("OPEN ELF", "Failed to open elf file", 1);
 	if (fstat(fp, &inf)) 
 		nerror("ELF STAT", "Unable to retreive stats of ELF file", 1);
 	const char *mm;
@@ -38,12 +38,15 @@ int read_elf(char *name){
 
 	// END READ 
 
-	if(verbose){
-		fprintf(stderr, " ELF Verification: %c", (unsigned char) mm[EI_MAG0]);
-		fprintf(stderr, "%c", (char) mm[EI_MAG1]);
-		fprintf(stderr, "%c", (char) mm[EI_MAG2]);
-		fprintf(stderr, "%c\n", (char) mm[EI_MAG3]);
-	}
+
+	// Verifying authenticity of ELF file
+	if( (unsigned char) mm[EI_MAG0] != ELFMAG0 ||
+			(unsigned char) mm[EI_MAG1] != ELFMAG1 ||
+			(unsigned char) mm[EI_MAG2] != ELFMAG2 ||
+			(unsigned char) mm[EI_MAG3] != ELFMAG3   )
+		nerror("ELF FILE", "Binary is not an ELF file, failed ELF header validation", 1);
+	else if(verbose) fprintf(stderr, "ELF file verified\n");
+	
 		
 	// colorscheme Atelier_ForrestDark
 

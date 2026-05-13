@@ -3,7 +3,6 @@
 
 
 int main(){
-	printf("TESTING BINARY TO INJECT");
-
+	printf("TESTING BINARY FOR INJECTION\n");
 	return 0;
 }
