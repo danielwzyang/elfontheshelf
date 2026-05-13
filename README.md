@@ -20,7 +20,7 @@ http://ouah.org/elf-pv.txt
 
 https://hckng.org/~isra/articles/house-of-pain.html
 
-https://www.man7.org/linux/man-pages/man5/elf.5.html
+https://www.man7.org/linux/man-pages/
 
 https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/
 
