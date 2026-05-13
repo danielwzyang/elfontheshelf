@@ -23,13 +23,15 @@ int read_header(char *name){
 		nerror("ELF STAT", "Unable to retreive stats of ELF file", 1);
 
 	const char *mm;
-	mm = mmap(NULL, stat.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+	mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+
 	return 0;
 }
 
 
 int main(int argc, char **argv){
-	read_header(argv[2]);
+	printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
+	read_header(argv[1]);
 	return 0;
 }
 
