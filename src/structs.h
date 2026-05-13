@@ -34,4 +34,8 @@ struct InjectionMetadata {
   int text_segment_index;
 };
 
+void write_injection(struct Elf64_Header header, struct InjectionMetadata);
+int read_header(char *name);
+void nerror(char *s, char *desc);
+
 #endif

@@ -7,6 +7,7 @@
 
 */
 
+
 // Coloured Error Printer
 
 int verbrose = 1; 
@@ -15,6 +16,7 @@ void nerror(char *error, char *desc, char fatal){
 	fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
 	fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
 	if(fatal) exit(1);
+
 }
 
 int read_elf(char *name){
@@ -46,17 +48,13 @@ int read_elf(char *name){
 	return 0;
 }
 
+void write_injection(struct Elf64_Header header, struct InjectionMetadata){
+		
+}
 
 int main(int argc, char **argv){
 	printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
 	read_elf(argv[1]);
 	return 0;
 }
-
-
-
-
-
-
-
 
