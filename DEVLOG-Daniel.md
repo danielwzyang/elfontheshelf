@@ -18,8 +18,8 @@ I also made a makefile target to automate it.
 I also got a basic execve to work to run ls.
 My next step is to figure out how to use a socket.
 
-### 2026-05-12: figured out argv
+### 2026-05-12: figured out argv + TCP reverse shell
 At first I was trying to figure out how to use a socket before realizing that I hadn't worked out argv yet.
 For exec.asm previously, I passed a null argv.
 I've edited exec.asm to run ls with the -lah flag as a proof of concept that I can run an executable with any arguments.
-
+I was also able to get a reverse shell working by opening a socket and connecting to my digital ocean droplet.
