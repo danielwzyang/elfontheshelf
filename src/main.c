@@ -38,6 +38,7 @@ int read_elf(char *name){
 	// printing all mm bytes
 	
 	
+	// cleaning up memmory
 	close(fp);
 	munmap((void *) mm, inf.st_size);
 	
