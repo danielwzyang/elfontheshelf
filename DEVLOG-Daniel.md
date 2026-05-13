@@ -23,3 +23,8 @@ At first I was trying to figure out how to use a socket before realizing that I 
 For exec.asm previously, I passed a null argv.
 I've edited exec.asm to run ls with the -lah flag as a proof of concept that I can run an executable with any arguments.
 I was also able to get a reverse shell working by opening a socket and connecting to my digital ocean droplet.
+
+### 2026-05-13: bind shell
+Using a similar concept to the reverse shell, I was able to get a bind shell working. 
+I also got the reverse shell to use /bin/sh instead of /bin/bash so it doesn't need the interactive flag.
+I also made some syntax tweaks to the other payloads.

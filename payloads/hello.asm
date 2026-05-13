@@ -17,4 +17,4 @@ _start:
     jmp rax
 
 text:
-    db "Hello world!", 0Ah ; define string and 0Ah is new line
+    db "Hello world!", 0x0A ; define string and 0x0A is new line
