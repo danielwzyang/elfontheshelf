@@ -10,7 +10,7 @@
 
 // Coloured Error Printer
 
-int verbrose = 1; 
+int verbose = 1; 
 
 void nerror(char *error, char *desc, char fatal){
 	fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
@@ -34,8 +34,18 @@ int read_elf(char *name){
 		nerror("ELF STAT", "Unable to retreive stats of ELF file", 1);
 	const char *mm;
 	mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
-	if(verbrose) perror("ELF file opened successfully \n");
+	if(verbose) fprintf(stderr, "ELF file opened successfully \n");
+
 	// END READ 
+
+	if(verbose){
+		fprintf(stderr, " ELF Verification: %c", (unsigned char) mm[EI_MAG0]);
+		fprintf(stderr, "%c", (char) mm[EI_MAG1]);
+		fprintf(stderr, "%c", (char) mm[EI_MAG2]);
+		fprintf(stderr, "%c\n", (char) mm[EI_MAG3]);
+	}
+		
+	// colorscheme Atelier_ForrestDark
 
 	// printing all mm bytes
 	
