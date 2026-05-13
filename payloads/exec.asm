@@ -4,7 +4,7 @@ global _start
 
 _start:
     ; first fork
-    mov rax, 58 ; sys_fork = 58
+    mov rax, 57 ; sys_fork = 57
     syscall
 
     test rax, rax ; check if rax is 0
