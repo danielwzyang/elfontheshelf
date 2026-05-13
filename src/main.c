@@ -34,6 +34,12 @@ int read_elf(char *name){
 	mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
 	if(verbrose) perror("ELF file opened successfully \n");
 	// END READ 
+
+	// printing all mm bytes
+	
+	
+	close(fp);
+	munmap((void *) mm, inf.st_size);
 	
 
 	return 0;
