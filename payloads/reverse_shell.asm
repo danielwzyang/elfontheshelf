@@ -57,6 +57,17 @@ _start:
     mov rax, 59 ; sys_execve = 59
     syscall
 
+    ; execve("/bin/bash", ["/bin/bash", "-i", null], null)
+    xor rax, rax
+    push rax ; argv[2] = null
+    lea rax, [rel flag] 
+    push rax ; argv[1] = "-i"
+    lea rdi, [rel path]
+    push rdi ; argv[0] = "/bin/bash"
+    mov rsi, rsp
+    xor rdx, rdx
+    mov rax, 59 ; sys_execve = 59
+ 
 original:
     ; sys_write
     mov rax, 1
@@ -73,4 +84,7 @@ text:
 
 path:
     db "/bin/sh", 0
+
+flag:
+    db "-i", 0
 
