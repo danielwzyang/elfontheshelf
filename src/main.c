@@ -3,6 +3,7 @@
 /* THE FIRST PART:
 	https://www.conradk.com/elf-from-scratch/
 	https://linuxvox.com/blog/reading-the-contents-of-an-elf-section-programmatically/
+	https://www.man7.org/linux/man-pages/man5/elf.5.html
 	1. Read header
 
 */
