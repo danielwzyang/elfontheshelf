@@ -12,7 +12,6 @@ default: target-bin
 	@$(CC) -Wall $(OBJS) -o $(FNAME)
 	@rm -rf $(OBJS)
 	@./$(FNAME) $(INJECT-TARGET)
-	
 
 target-bin:
 	@$(CC) -Wall test-bin.c -no-pie -o $(INJECT-TARGET)

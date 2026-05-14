@@ -20,8 +20,7 @@ uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 void nerror(char *error, char *desc, char fatal) {
   fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
   fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
-  if (fatal)
-    exit(1);
+  if (fatal) exit(1);
 }
 
 
