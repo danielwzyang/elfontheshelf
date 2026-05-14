@@ -55,11 +55,11 @@ int read_elf(char *name){
 	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
 
 	if( header->e_phoff == 0 )
-		nerror("ELF Header", "ELF Program Header struct brokeen?", 1);
+		nerror("ELF Header", "ELF file Header struct brokeen?", 1);
 	else if( header->e_shoff == 0 )
 		nerror("ELF Header", "ELF Section Header struct brokeen?", 1);
 	else if(verbose){
-		fprintf(stderr, "Elf program header byte pos: %lu\n", header->e_phoff);
+		fprintf(stderr, "Elf file header byte pos: %lu\n", header->e_phoff);
 		fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
 	}
 	
@@ -69,16 +69,20 @@ int read_elf(char *name){
 		fprintf(stderr, "Program header entries: %d\n", phnum);
 		fprintf(stderr, "Program header entry byte size: %d\n", phsize);
 
-		fprintf(stderr, "Program header entries:");
+		fprintf(stderr, "Program header entries:\n");
 		for(int i = 0; i < phnum; ++i){
-			for(int j = 0; j < 27; ++j)
-				printf("%c", mm[header->e_phoff+(phnum*phsize)+j]);
-			printf("\n");
+			fprintf(stderr, "\t%2d: ", i+1);
+			for(int j = 0; j < phsize; ++j)
+				fprintf(stderr, "\e[0;32m%x\e[0m", mm[header->e_phoff+(i*phsize)+j]);
+			fprintf(stderr, "\n");
 		}
 	}
 	fprintf(stderr, "Elf header table: %x\n", mm[header->e_phoff]);
-
 	// Program Header
+	
+	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
+	if(verbose) fprintf(stderr, "Elf program byte offset: %lu\n", pheader->p_offset);
+
 	
 	
 		
