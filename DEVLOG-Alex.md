@@ -24,5 +24,7 @@ This document must be updated daily every time you finish a work session.
 
 ### 2026-05-13 - Comments, 
 - Better comments for reading ELF
+- ELF file authenticity verification
+
 
 

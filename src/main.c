@@ -7,7 +7,6 @@
 
 */
 
-
 // Coloured Error Printer
 
 int verbose = 1; 
@@ -48,9 +47,6 @@ int read_elf(char *name){
 	else if(verbose) fprintf(stderr, "ELF file verified\n");
 	
 		
-	// colorscheme Atelier_ForrestDark
-
-	// printing all mm bytes
 	
 	
 	// cleaning up memmory
