@@ -1,14 +1,14 @@
 #ifndef STRUCT_H
 #define STRUCT_H
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <sys/stat.h>
-	#include <sys/mman.h>
-	#include <sys/types.h>
-	#include <string.h>
-	#include <elf.h>
-	#include <unistd.h>
-	#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+// #include <elf.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 struct Elf64_Header {
   uint16_t e_type;
@@ -33,9 +33,5 @@ struct InjectionMetadata {
   uint32_t payload_size;
   int text_segment_index;
 };
-
-void write_injection(struct Elf64_Header header, struct InjectionMetadata);
-int read_header(char *name);
-void nerror(char *s, char *desc);
 
 #endif
