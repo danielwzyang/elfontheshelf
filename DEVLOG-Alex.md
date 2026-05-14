@@ -8,8 +8,6 @@ This document must be updated daily every time you finish a work session.
 - Discussed project dynamics
 - Started README
 
-
-
 ### 2026-05-12 - Starting ELF injector
 - Worked on main elf infecter, opening the ELF file
 - Created a testing makefile
@@ -22,9 +20,12 @@ This document must be updated daily every time you finish a work session.
 - Error detection and printing
 
 
-### 2026-05-13 - Comments, 
+### 2026-05-13 - Comments, verification, Elf header extraction
 - Better comments for reading ELF
 - ELF file authenticity verification
+- started with ELF header interaction
 
-
+### 2026-05-13 - Elf header interactions, program header extraction
+- Extracted header section of ELF file
+- Extract*(ing) programs from header seection
 
