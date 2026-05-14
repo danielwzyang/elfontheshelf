@@ -3,9 +3,8 @@
 CC := gcc
 CMPF := main.c 
 OBJS := main.o 
-FNAME := INJECTOR
-
-INJECT-TARGET := target
+FNAME := injector.pro
+INJECT-TARGET := target.pro
 
 
 default: target-bin
