@@ -115,10 +115,15 @@ void write_injection(char *target_path, struct Elf64_Header header,
     nerror("Write injection", "Failed to write payload", 1);
 
   if (verbrose)
-    printf("[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len,
+   fprintf(sterr, "[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len,
            meta.target_padding_offset);
 
-  // ok i need to go back to original herei think
+  
+  if (lseek(fd, meta.original_entry, SEEK_SET) < 0)
+    nerror("Write injection", "Failed to set original starting point", 1);
+   
+
+   
 }
 
 int main(int argc, char **argv) {
