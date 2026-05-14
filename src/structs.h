@@ -6,9 +6,9 @@
 	#include <sys/mman.h>
 	#include <sys/types.h>
 	#include <string.h>
-	#include <elf.h>
 	#include <unistd.h>
 	#include <fcntl.h>
+	#include <elf.h>
 
 struct Elf64_Header {
   uint16_t e_type;

@@ -31,8 +31,7 @@ int read_elf(char *name){
 		nerror("OPEN ELF", "Failed to open elf file", 1);
 	if (fstat(fp, &inf)) 
 		nerror("ELF STAT", "Unable to retreive stats of ELF file", 1);
-	const char *mm;
-	mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+	const char *mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
 	if(verbose) fprintf(stderr, "ELF file opened successfully \n");
 
 	// END READ 
@@ -50,7 +49,35 @@ int read_elf(char *name){
 		nerror("ELF FILE", "Binary is not 64 bit, failed ELF header validation", 1);
 	else if(verbose) fprintf(stderr, "ELF file verified.\n");
 	// END VERIFY
+		
+	// ELF header
+	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
 
+	if( header->e_phoff == 0 )
+		nerror("ELF Header", "ELF Program Header struct brokeen?", 1);
+	else if( header->e_shoff == 0 )
+		nerror("ELF Header", "ELF Section Header struct brokeen?", 1);
+	else if(verbose){
+		fprintf(stderr, "Elf program header byte pos: %lu\n", header->e_phoff);
+		fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
+	}
+	
+	unsigned int phsize = header->e_phentsize;
+	unsigned int phnum = header->e_phnum;
+	if(verbose){
+		fprintf(stderr, "Program header entries: %d\n", phnum);
+		fprintf(stderr, "Program header entry byte size: %d\n", phsize);
+
+		fprintf(stderr, "Program header entries:");
+		for(int i = 0; i < phnum; ++i){
+			for(int j = 0; j < 27; ++j)
+				printf("%c", mm[header->e_phoff+(phnum*phsize)+j]);
+			printf("\n");
+		}
+	}
+	fprintf(stderr, "Elf header table: %x\n", mm[header->e_phoff]);
+
+	// Program Header
 	
 	
 		
