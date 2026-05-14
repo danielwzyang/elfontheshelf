@@ -1,5 +1,6 @@
 #ifndef STRUCT_H
 #define STRUCT_H
+
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <sys/stat.h>
@@ -9,6 +10,7 @@
 	#include <unistd.h>
 	#include <fcntl.h>
 	#include <elf.h>
+
 
 struct Elf64_Header {
   uint16_t e_type;
@@ -34,7 +36,5 @@ struct InjectionMetadata {
   int text_segment_index;
 };
 
-void write_injection(struct Elf64_Header header, struct InjectionMetadata);
-int read_header(char *name);
 
 #endif

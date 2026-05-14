@@ -10,14 +10,20 @@
 
 // Coloured Error Printer
 
+
 int verbose = 1; 
 
-void nerror(char *error, char *desc, char fatal){
-	fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
-	fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
-	if(fatal) exit(1);
+unsigned char placeholder_payload[] = {0x90, 0x90, 0x90, 0x90,
+                                       0x90, 0x90, 0x90, 0x90};
+uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 
+void nerror(char *error, char *desc, char fatal) {
+  fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
+  fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
+  if (fatal)
+    exit(1);
 }
+
 
 int read_elf(char *name){
 	/* READING ELF DATA:
@@ -91,16 +97,37 @@ int read_elf(char *name){
 	munmap((void *) mm, inf.st_size);
 	
 
-	return 0;
+  close(fp);
+  munmap((void *)mm, inf.st_size);
+
+  return 0;
 }
 
-void write_injection(struct Elf64_Header header, struct InjectionMetadata){
-		
+void write_injection(char *target_path, struct Elf64_Header header,
+                     struct InjectionMetadata meta) {
+  int fd = open(target_path, O_RDWR);
+  if (fd < 0)
+    nerror("Write injection", "Failed to open target binary for writing", 1);
+
+  if (lseek(fd, meta.target_padding_offset, SEEK_SET) < 0)
+    nerror("Write injection", "Failed to seek to padding offset", 1);
+
+  unsigned char *payload = placeholder_payload;
+  uint32_t payload_len =
+      meta.payload_size > 0 ? meta.payload_size : placeholder_payload_size;
+
+  if (write(fd, payload, payload_len) != (ssize_t)payload_len)
+    nerror("Write injection", "Failed to write payload", 1);
+
+  if (verbose)
+    printf("[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len,
+           meta.target_padding_offset);
+
+  // ok i need to go back to original herei think
 }
 
-int main(int argc, char **argv){
-	printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
-	read_elf(argv[1]);
-	return 0;
+int main(int argc, char **argv) {
+  printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
+  read_elf(argv[1]);
+  return 0;
 }
-
