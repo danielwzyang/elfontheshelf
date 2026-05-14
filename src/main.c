@@ -38,17 +38,22 @@ int read_elf(char *name){
 	// END READ 
 
 
-	// Verifying authenticity of ELF file
-	if( (unsigned char) mm[EI_MAG0] != ELFMAG0 ||
-			(unsigned char) mm[EI_MAG1] != ELFMAG1 ||
-			(unsigned char) mm[EI_MAG2] != ELFMAG2 ||
-			(unsigned char) mm[EI_MAG3] != ELFMAG3   )
+	// Verifying authenticity & type of ELF file
+		// verify authenticity
+	if( mm[EI_MAG0] != ELFMAG0 ||
+			mm[EI_MAG1] != ELFMAG1 ||
+			mm[EI_MAG2] != ELFMAG2 ||
+			mm[EI_MAG3] != ELFMAG3   )
 		nerror("ELF FILE", "Binary is not an ELF file, failed ELF header validation", 1);
-	else if(verbose) fprintf(stderr, "ELF file verified\n");
+		// verify 64 bit
+	if( mm[EI_CLASS] != ELFCLASS64 )
+		nerror("ELF FILE", "Binary is not 64 bit, failed ELF header validation", 1);
+	else if(verbose) fprintf(stderr, "ELF file verified.\n");
+	// END VERIFY
+
+	
 	
 		
-	
-	
 	// cleaning up memmory
 	close(fp);
 	munmap((void *) mm, inf.st_size);
