@@ -82,6 +82,11 @@ _start:
     mov rax, 59
     syscall
 
+    ; if execve failed exit
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+
 original:
     mov rax, 1 ; sys_write
     mov rdi, 1
