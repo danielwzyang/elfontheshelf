@@ -15,3 +15,11 @@ Created a structs.h file so that me and Alex can work simultaneously on the ELF 
 ### 2026-05-13
 
 Added writing to elf file based on struct info and payload as well as placeholder values for about 2 hours. Not tested yet.
+
+### 2026-05-14
+
+Trying to set entrypoint back to original and fixing merges for a class period.
+
+### 2026-05-15 
+
+Made write_injection go back to the original and made it seem like the original elf. This is quite untested; about 4 hours. 

