@@ -119,9 +119,31 @@ void write_injection(char *target_path, struct Elf64_Header header,
            meta.target_padding_offset);
 
   
-  if (lseek(fd, meta.original_entry, SEEK_SET) < 0)
-    nerror("Write injection", "Failed to set original starting point", 1);
-   
+  unsigned char jmp_stub[12];
+  jmp_stub[0] = 0x48;
+  jmp_stub[1] = 0xb8;
+  memcpy(&jmp_stub[2], &meta.original_entry, 8);
+  jmp_stub[10] = 0xff;
+  jmp_stub[11] = 0xe0;
+
+  if (write(fd, jmp_stub, sizeof(jmp_stub)) != sizeof(jmp_stub))
+    nerror("Write injection", "Failed to write jump-back stub", 1);
+
+  if (verbose)
+    fprintf(sterr, "targets original entry 0x%lx\n",
+           meta.original_entry);
+
+  uint64_t elf_entry_offset = 0x18;
+  if (lseek(fd, elf_entry_offset, SEEK_SET) < 0)
+    nerror("Writing injection", "Failed to seek to e_entry", 1);
+
+  uint64_t new_entry = meta.target_vaddr;
+  if (write(fd, &new_entry, sizeof(new_entry)) != sizeof(new_entry))
+    nerror("Writing injection", "Failed to patch e_entry", 1);
+
+  if (verbose)
+    fprintf(sterr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
+
 
    
 }
