@@ -57,7 +57,9 @@ int read_elf(char *name){
 	// END VERIFY
 		
 	/* ELF header
-		 header (Elf64_Ehdr) : Elf header, contains info about binary
+		 header (Elf64_Ehdr)		: Elf header, contains info about binary
+		 phsize (unsigned int)	: Elf program header size
+		 phnum (unsigned int)		: Elf program header quantity
 	*/
 	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
 
@@ -93,20 +95,29 @@ int read_elf(char *name){
 
 	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
 
-	if (pheader->p_filesz <= 0)
-		f_error("ELF PROGRAM HEADER", "Program header does not exist!");
 	if(verbose){
 		fprintf(stderr, "\n");
 		fprintf(stderr, "Elf program header mem size: %lu\n", pheader->p_memsz);
 		fprintf(stderr, "Elf program header byte offset: %lu\n", pheader->p_offset);
 		fprintf(stderr, "Elf program header size: %lu\n", pheader->p_filesz);
 	}
+	for(int i = 0; i < phnum; ++i){
+		if (pheader[i].p_filesz >= 0 && (pheader[i].p_flags & PF_X) ){
+			int start = pheader[i].p_filesz + pheader[i].p_offset;
+			int end = pheader[i].p_memsz - start;
+			fprintf(stderr, "FOUND VALID PROGRAM HEADER TO INFECT, at %x\n", start);
+			fprintf(stderr, "END, at %x\n", end);
+			fprintf(stderr, "BYTES SIZE: %d\n", start - end);
+
+		}
+		
+	}
 		
 
 	
 	
 		
-	// cleaning up memmory
+	// cleaning up memory
 	close(fp);
 	munmap((void *) mm, inf.st_size);
 	
