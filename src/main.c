@@ -114,7 +114,7 @@ void write_injection(char *target_path, struct Elf64_Header header,
   if (write(fd, payload, payload_len) != (ssize_t)payload_len)
     nerror("Write injection", "Failed to write payload", 1);
 
-  if (verbrose)
+  if (verbose)
    fprintf(sterr, "[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len,
            meta.target_padding_offset);
 
@@ -130,7 +130,7 @@ void write_injection(char *target_path, struct Elf64_Header header,
     nerror("Write injection", "Failed to write jump-back stub", 1);
 
   if (verbose)
-    fprintf(sterr, "targets original entry 0x%lx\n",
+    fprintf(stderr, "targets original entry 0x%lx\n",
            meta.original_entry);
 
   uint64_t elf_entry_offset = 0x18;
@@ -142,7 +142,7 @@ void write_injection(char *target_path, struct Elf64_Header header,
     nerror("Writing injection", "Failed to patch e_entry", 1);
 
   if (verbose)
-    fprintf(sterr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
+    fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
 
 
    
