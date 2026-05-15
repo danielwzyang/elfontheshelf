@@ -22,6 +22,11 @@ _start:
     mov rax, 59 ; sys_execve = 59
     syscall
 
+    ; if execve failed exit
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+
 ; read hello.asm
 hello:
     mov rax, 1

