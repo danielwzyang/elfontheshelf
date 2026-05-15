@@ -26,10 +26,10 @@ void f_error(char *error, char *desc) {
 
 int read_elf(char *name){
 	/* READING ELF DATA:
-		file pointer		fp 	(int)
-		memory stats		inf	(struct stat)
-		memmory map			mm	(const char *)
-		-> mmap exports file to string, with stats in inf
+		fp 	(int) 					: file pointer
+		inf	(struct stat)		: memory stats 
+		mm	(const char *)	: memmory map with mmap
+			-> mmap exports file to string, with stats in inf
 	*/
 	int fp = open(name, O_RDONLY); 
 	struct stat inf;
@@ -56,7 +56,9 @@ int read_elf(char *name){
 	else if(verbose) fprintf(stderr, "ELF file verified.\n\n");
 	// END VERIFY
 		
-	// ELF header
+	/* ELF header
+		 header (Elf64_Ehdr) : Elf header, contains info about binary
+	*/
 	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
 
 	if( header->e_phoff == 0 )
@@ -85,10 +87,12 @@ int read_elf(char *name){
 	}
 
 	fprintf(stderr, "Elf program header table offset: %x\n", mm[header->e_phoff]);
-	// Program Header
-		// pheader is an array of the programs
-	
+	/* Program Header
+		 pheader (Elf64_Phdr) : Array of programs
+	*/
+
 	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
+
 	if (pheader->p_filesz <= 0)
 		f_error("ELF PROGRAM HEADER", "Program header does not exist!");
 	if(verbose){
