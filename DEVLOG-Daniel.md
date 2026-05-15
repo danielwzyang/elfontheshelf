@@ -28,3 +28,7 @@ I was also able to get a reverse shell working by opening a socket and connectin
 Using a similar concept to the reverse shell, I was able to get a bind shell working.
 I also made some syntax tweaks to the other payloads.
 My next step is to figure out how to download a payload from somewhere using HTTP and run that payload.
+
+### 2026-05-14: download payload
+I started to figure out how to use HTTP requests to try to download a binary from a web server that I'd host on the digital ocean droplet.
+I also added some syscalls like fchmod that I need to use to get the whole thing working.
