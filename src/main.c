@@ -75,7 +75,7 @@ int read_elf(char *name){
 	if(verbose){
 		fprintf(stderr, "Program header entries: %d\n", phnum);
 		fprintf(stderr, "Program header entry byte size: %d\n", phsize);
-/*
+/* idk what I was doing here, this does something I guess
 		fprintf(stderr, "Program header entries:\n");
 		for(int i = 0; i < phnum; ++i){
 			fprintf(stderr, "\t%2d: ", i+1);
