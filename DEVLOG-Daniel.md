@@ -36,4 +36,6 @@ I also added some syscalls like fchmod that I need to use to get the whole thing
 ### 2026-05-15: use TCP instead of HTTP for the payload
 I got a simple bash script payload to work and now thereotically any executable can be ran.
 The program also quits if the execve fails.
+I also made changes to the makefile and the payloads to allow for custom IPs and ports rather than having them as hardcoded constants.
+I used built in make functions like subst to allow for string parsing through make only.
 
