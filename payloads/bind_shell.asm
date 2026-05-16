@@ -1,5 +1,9 @@
 [bits 64]
 
+%ifndef PORT
+    %define PORT 0x2823 ; 9000
+%endif
+
 global _start
 
 _start:
@@ -18,7 +22,7 @@ _start:
     mov rdi, rax ; fd = socketfd
     sub rsp, 16 ; allocate 16 bytes for sockaddr_in
     mov word [rsp], 2 ; sin_family = AF_INET
-    mov word [rsp+2], 0x2823 ; sin_port = 9000 
+    mov word [rsp+2], PORT
     mov dword [rsp+4], 0 ; sin_addr = 0 (all)
     mov rsi, rsp
     mov rdx, 16 ; addr_len = 16

