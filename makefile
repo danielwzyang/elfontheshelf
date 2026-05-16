@@ -1,9 +1,10 @@
 NASM_FLAGS :=
+
 ifdef IP
-NASM_FLAGS += -DIPADDR=$(shell printf '0x%02X%02X%02X%02X' $(subst ., ,$(IP)))
+NASM_FLAGS += -DIPADDR=$(shell printf '0x%02X%02X%02X%02X' $(subst ., ,$(IP))) # replace periods with commas and change to proper endian
 endif
 ifdef PORT
-NASM_FLAGS += -DPORT=$(shell printf '0x%02X%02X' $$(($(PORT) & 0xFF)) $$(($(PORT) >> 8)))
+NASM_FLAGS += -DPORT=$(shell printf '0x%02X%02X' $$(($(PORT) & 0xFF)) $$(($(PORT) >> 8))) # change to proper endian
 endif
 
 payload:
