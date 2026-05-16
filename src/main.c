@@ -95,19 +95,22 @@ int read_elf(char *name){
 
 	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
 
-	if(verbose){
-		fprintf(stderr, "\n");
-		fprintf(stderr, "Elf program header mem size: %lu\n", pheader->p_memsz);
-		fprintf(stderr, "Elf program header byte offset: %lu\n", pheader->p_offset);
-		fprintf(stderr, "Elf program header size: %lu\n", pheader->p_filesz);
-	}
 	for(int i = 0; i < phnum; ++i){
 		if (pheader[i].p_filesz >= 0 && (pheader[i].p_flags & PF_X) ){
+
 			int start = pheader[i].p_filesz + pheader[i].p_offset;
-			int end = pheader[i].p_memsz - start;
+			int end = pheader[i].p_offset + pheader[i].p_memsz;
 			fprintf(stderr, "FOUND VALID PROGRAM HEADER TO INFECT, at %x\n", start);
+
+			if(verbose){
+				fprintf(stderr, "\n");
+				fprintf(stderr, "Elf program header mem size: %lu\n", pheader[i].p_memsz);
+				fprintf(stderr, "Elf program file size: %lu\n", pheader[i].p_filesz);
+				fprintf(stderr, "Elf program header byte offset: %lu\n", pheader[i].p_offset);
+			}
+
 			fprintf(stderr, "END, at %x\n", end);
-			fprintf(stderr, "BYTES SIZE: %d\n", start - end);
+			fprintf(stderr, "BYTES SIZE: %d\n", end - start);
 
 		}
 		
