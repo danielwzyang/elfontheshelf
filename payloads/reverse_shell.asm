@@ -72,18 +72,8 @@ _start:
     syscall
  
 original:
-    ; sys_write
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [rel text]
-    mov rdx, 25
-    syscall
-    
     mov rax, 0xDEADBEEFDEADBEEF
     jmp rax
-
-text:
-    db "is it dead beef or steak", 0x0A
 
 path:
     db "/bin/bash", 0

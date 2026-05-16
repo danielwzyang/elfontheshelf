@@ -68,18 +68,8 @@ _start:
     syscall
 
 original:
-    ; sys_write
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [rel text]
-    mov rdx, 39
-    syscall
-
     mov rax, 0xDEADBEEFDEADBEEF
     jmp rax
-
-text:
-    db "dead beef can be binded with meat glue", 0x0A
 
 path:
     db "/bin/bash", 0
