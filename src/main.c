@@ -88,7 +88,7 @@ int read_elf(char *name){
 		*/
 	}
 
-	fprintf(stderr, "Elf program header table offset: %x\n", mm[header->e_phoff]);
+	fprintf(stderr, "Elf program header table offset: %x\n\n", mm[header->e_phoff]);
 	/* Program Header
 		 pheader (Elf64_Phdr) : Array of programs
 	*/
@@ -96,19 +96,21 @@ int read_elf(char *name){
 	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
 
 	for(int i = 0; i < phnum; ++i){
+		if(verbose)
+			fprintf(stderr, "\tChecking header %d\n", i+1);
 		if (pheader[i].p_filesz >= 0 && (pheader[i].p_flags & PF_X) ){
 
-			int start = pheader[i].p_filesz + pheader[i].p_offset;
-			int end = pheader[i].p_offset + pheader[i].p_memsz;
-			fprintf(stderr, "FOUND VALID PROGRAM HEADER TO INFECT, at %x\n", start);
+			int start = pheader[i].p_vaddr + pheader[i].p_offset;
+			int end = pheader[i].p_vaddr + pheader[i].p_memsz;
+			fprintf(stderr, "\nFOUND VALID PROGRAM HEADER TO INFECT, at %x\n", start);
 
 			if(verbose){
-				fprintf(stderr, "\n");
-				fprintf(stderr, "Elf program header mem size: %lu\n", pheader[i].p_memsz);
-				fprintf(stderr, "Elf program file size: %lu\n", pheader[i].p_filesz);
-				fprintf(stderr, "Elf program header byte offset: %lu\n", pheader[i].p_offset);
+				fprintf(stderr, "\tElf program header mem size: %lu\n", pheader[i].p_memsz);
+				fprintf(stderr, "\tElf program file size: %lu\n", pheader[i].p_filesz);
+				fprintf(stderr, "\tElf program header byte offset: %lu\n", pheader[i].p_offset);
 			}
 
+			fprintf(stderr, "\nSTART, at %x\n", start);
 			fprintf(stderr, "END, at %x\n", end);
 			fprintf(stderr, "BYTES SIZE: %d\n", end - start);
 
