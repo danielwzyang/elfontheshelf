@@ -64,20 +64,21 @@ uint64_t read_elf(char *name, size_t prog_size){
 	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
 
 	if( header->e_phoff == 0 )
-		f_error("ELF Header", "ELF file Header struct brokeen?");
+		f_error("ELF Header", "ELF file Header struct broken");
 	else if( header->e_shoff == 0 )
-		f_error("ELF Header", "ELF Section Header struct brokeen?");
+		f_error("ELF Header", "ELF Section Header struct broken");
 	else if(verbose){
 		fprintf(stderr, "Elf file header byte pos: %lu\n", header->e_phoff);
 		//fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
 	}
 	
-	unsigned int phsize = header->e_phentsize;
 	unsigned int phnum = header->e_phnum;
 	if(verbose){
-		fprintf(stderr, "Program header entries: %d\n", phnum);
-		fprintf(stderr, "Program header entry byte size: %d\n", phsize);
-/* idk what I was doing here, this does something I guess
+		fprintf(stderr, "Program header entries:           %d\n", phnum);
+		fprintf(stderr, "Program header entry byte size:   0x%x\n", (uint16_t) header->e_phentsize);
+		fprintf(stderr, "Program header entry byte offset: 0x%x\n", (uint16_t) header->e_phoff);
+
+		/* idk what I was doing here, this does something I guess
 		fprintf(stderr, "Program header entries:\n");
 		for(int i = 0; i < phnum; ++i){
 			fprintf(stderr, "\t%2d: ", i+1);
@@ -88,7 +89,6 @@ uint64_t read_elf(char *name, size_t prog_size){
 		*/
 	}
 
-	fprintf(stderr, "Elf program header table offset: %x\n\n", mm[header->e_phoff]);
 	/* Program Header
 		 pheader (Elf64_Phdr) : Array of programs
 	*/
@@ -109,16 +109,16 @@ uint64_t read_elf(char *name, size_t prog_size){
 				fprintf(stderr, "\tElf program header physical address:     0x%lx\n", pheader[i].p_paddr);
 				fprintf(stderr, "\tElf program header byte virtual address: 0x%lx\n", pheader[i].p_vaddr);
 			}
-			
+
 			uint64_t nh = -1;
 			for(int j = 0; j < phnum; ++j)
-				if(pheader[j].p_offset > start){
-					if(pheader[j].p_offset < prog_size && pheader[j].p_filesz > 0)
-						f_error("INJECTION", "Not enough padding, injection too large!");
-					if(nh = -1) nh = pheader[j].p_offset;
+				if(pheader[j].p_offset > start && pheader[j].p_filesz > 0){
+					if(nh == -1) nh = pheader[j].p_offset;
 					else nh = (nh > pheader[j].p_offset) ? pheader[j].p_offset : nh;
 				}
-
+			nh--;
+			if(prog_size > nh-start)
+				f_error("INJECTION", "Not enough padding, injection too large!");
 			fprintf(stderr, "\nSTART BYTE: %lu\n", start);
 			fprintf(stderr, "END BYTE: %lu\n", nh);
 			fprintf(stderr, "BYTES SIZE: %lu\n", nh - start);
