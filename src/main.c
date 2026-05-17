@@ -24,7 +24,7 @@ void f_error(char *error, char *desc) {
 }
 
 
-int read_elf(char *name){
+uint64_t read_elf(char *name, size_t prog_size){
 	/* READING ELF DATA:
 		fp 	(int) 					: file pointer
 		inf	(struct stat)		: memory stats 
@@ -93,44 +93,43 @@ int read_elf(char *name){
 		 pheader (Elf64_Phdr) : Array of programs
 	*/
 
-	Elf64_Phdr *pheader = (Elf64_Phdr *) mm;
+	Elf64_Phdr const *pheader = (Elf64_Phdr *) (mm + header->e_phoff);
+	uint64_t start;
 
 	for(int i = 0; i < phnum; ++i){
-		if(verbose)
-			fprintf(stderr, "\tChecking header %d\n", i+1);
-		if (pheader[i].p_filesz >= 0 && (pheader[i].p_flags & PF_X) ){
+		if (pheader[i].p_filesz > 0 && (pheader[i].p_flags & PF_X) && (pheader[i].p_filesz == pheader[i].p_memsz)){
 
-			int start = pheader[i].p_vaddr + pheader[i].p_offset;
-			int end = pheader[i].p_vaddr + pheader[i].p_memsz;
-			fprintf(stderr, "\nFOUND VALID PROGRAM HEADER TO INFECT, at %x\n", start);
+			start = pheader[i].p_memsz + pheader[i].p_offset;
+			fprintf(stderr, "\nFOUND VALID PROGRAM HEADER TO INFECT, at %lu, p%d\n", start, i+1);
 
 			if(verbose){
-				fprintf(stderr, "\tElf program header mem size: %lu\n", pheader[i].p_memsz);
-				fprintf(stderr, "\tElf program file size: %lu\n", pheader[i].p_filesz);
-				fprintf(stderr, "\tElf program header byte offset: %lu\n", pheader[i].p_offset);
+				fprintf(stderr, "\tElf program header mem size:             0x%lx\n", pheader[i].p_memsz);
+				fprintf(stderr, "\tElf program file size:                   0x%lx\n", pheader[i].p_filesz);
+				fprintf(stderr, "\tElf program header byte offset:          0x%lx\n", pheader[i].p_offset);
+				fprintf(stderr, "\tElf program header physical address:     0x%lx\n", pheader[i].p_paddr);
+				fprintf(stderr, "\tElf program header byte virtual address: 0x%lx\n", pheader[i].p_vaddr);
 			}
+			
+			uint64_t nh = -1;
+			for(int j = 0; j < phnum; ++j)
+				if(pheader[j].p_offset > start){
+					if(pheader[j].p_offset < prog_size && pheader[j].p_filesz > 0)
+						f_error("INJECTION", "Not enough padding, injection too large!");
+					if(nh = -1) nh = pheader[j].p_offset;
+					else nh = (nh > pheader[j].p_offset) ? pheader[j].p_offset : nh;
+				}
 
-			fprintf(stderr, "\nSTART, at %x\n", start);
-			fprintf(stderr, "END, at %x\n", end);
-			fprintf(stderr, "BYTES SIZE: %d\n", end - start);
+			fprintf(stderr, "\nSTART BYTE: %lu\n", start);
+			fprintf(stderr, "END BYTE: %lu\n", nh);
+			fprintf(stderr, "BYTES SIZE: %lu\n", nh - start);
 
 		}
-		
 	}
-		
-
-	
-	
-		
 	// cleaning up memory
 	close(fp);
-	munmap((void *) mm, inf.st_size);
-	
-
-  close(fp);
   munmap((void *)mm, inf.st_size);
 
-  return 0;
+  return start;
 }
 
 void write_injection(char *target_path, struct Elf64_Header header,
@@ -177,13 +176,10 @@ void write_injection(char *target_path, struct Elf64_Header header,
 
   if (verbose)
     fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
-
-
-   
 }
 
 int main(int argc, char **argv) {
   printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
-  read_elf(argv[1]);
+		read_elf(argv[1], 100);
   return 0;
 }
