@@ -119,9 +119,10 @@ uint64_t read_elf(char *name, size_t prog_size){
 			nh--;
 			if(prog_size > nh-start)
 				f_error("INJECTION", "Not enough padding, injection too large!");
-			fprintf(stderr, "\nSTART BYTE: %lu\n", start);
-			fprintf(stderr, "END BYTE: %lu\n", nh);
-			fprintf(stderr, "BYTES SIZE: %lu\n", nh - start);
+			fprintf(stderr, "\n");
+			fprintf(stderr, "START BYTE:   0x%lx\n", start);
+			fprintf(stderr, "END BYTE:     0x%lx\n", nh);
+			fprintf(stderr, "BYTES SIZE:   %lu\n", nh - start);
 
 		}
 	}
