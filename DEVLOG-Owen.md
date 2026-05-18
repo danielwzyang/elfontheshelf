@@ -23,3 +23,11 @@ Trying to set entrypoint back to original and fixing merges for a class period.
 ### 2026-05-15 
 
 Made write_injection go back to the original and made it seem like the original elf. This is quite untested; about 4 hours. 
+
+### 2026-05-17
+
+Added some stuff in structs.h and makefile so that I can compile since I'm on macOS and don't have the elf.h file natively.
+
+### 2026-05-17
+
+Fixed injection where the paylaod didn't have the correct address, and also the header wasnt updated to have the correct filesize and mem size, so the process wouldn't extend to the payload. 
