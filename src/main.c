@@ -13,8 +13,7 @@
 
 int verbose = 1;
 
-unsigned char placeholder_payload[] = {0x90, 0x90, 0x90, 0x90,
-                                       0x90, 0x90, 0x90, 0x90};
+unsigned char placeholder_payload[] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
 uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 
 // not sure if this is needed, we might be able to put this somewhere else
@@ -34,6 +33,8 @@ uint64_t read_elf(char *name, size_t prog_size){
 		mm	(const char *)	: memmory map with mmap
 			-> mmap exports file to string, with stats in inf
 	*/
+	if(prog_size == 0)
+		f_error("PAYLOAD", "Payload Size 0 Error");
 	int fp = open(name, O_RDONLY); 
 	struct stat inf;
 	if (fp < 0) 
@@ -126,7 +127,7 @@ uint64_t read_elf(char *name, size_t prog_size){
 				}
 			nh--;
 			if(prog_size > nh-start)
-				f_error("INJECTION", "Not enough padding, injection too large!");
+				f_error("PAYLOAD", "Not enough padding, payload too large!");
 			fprintf(stderr, "\n");
 			fprintf(stderr, "START BYTE:   0x%lx\n", start);
 			fprintf(stderr, "END BYTE:     0x%lx\n", nh);
@@ -142,14 +143,10 @@ uint64_t read_elf(char *name, size_t prog_size){
   return start;
 }
 
+
 void write_injection(char *target_path, Elf64_Ehdr *header,
                      unsigned char *payload_data, uint32_t payload_len,
                      struct InjectionMetadata meta) {
-  if (payload_len == 0) {
-    payload_data = placeholder_payload;
-    payload_len = placeholder_payload_size;
-  }
-
   int fd = open(target_path, O_RDWR);
   if (fd < 0)
     f_error("Write injection", "Failed to open target binary for writing");
