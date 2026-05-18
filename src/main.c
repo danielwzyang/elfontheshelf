@@ -20,32 +20,12 @@ uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 // not sure if this is needed, we might be able to put this somewhere else
 #define DEADBEEF_MAGIC 0xDEADBEEFDEADBEEFULL
 
-void write_injection(char *target_path, Elf64_Ehdr *header,
-                     unsigned char *payload_data, uint32_t payload_len,
-                     struct InjectionMetadata meta);
 
 void f_error(char *error, char *desc) {
   fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
   fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
   exit(1);
 }
-
-int read_elf(char *name) {
-  /* READING ELF DATA:
-          fp 	(int) 					: file pointer
-          inf	(struct stat)		: memory stats
-          mm	(const char *)	: memmory map with mmap
-                  -> mmap exports file to string, with stats in inf
-  */
-  int fp = open(name, O_RDONLY);
-  struct stat inf;
-  if (fp < 0)
-    f_error("OPEN ELF", "Failed to open elf file");
-  if (fstat(fp, &inf))
-    f_error("ELF STAT", "Unable to retreive stats of ELF file");
-  const char *mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
-  if (verbose)
-    fprintf(stderr, "ELF file opened successfully \n");
 
 uint64_t read_elf(char *name, size_t prog_size){
 	/* READING ELF DATA:
@@ -107,8 +87,7 @@ uint64_t read_elf(char *name, size_t prog_size){
 		fprintf(stderr, "Program header entry byte size:   0x%x\n", (uint16_t) header->e_phentsize);
 		fprintf(stderr, "Program header entry byte offset: 0x%x\n", (uint16_t) header->e_phoff);
 
-		/* idk what I was doing here, this does something I guess
-		fprintf(stderr, "Program header entries:\n");
+		/* idk what I was doing here, this does something I guess fprintf(stderr, "Program header entries:\n");
 		for(int i = 0; i < phnum; ++i){
 			fprintf(stderr, "\t%2d: ", i+1);
 			for(int j = 0; j < phsize; ++j)
@@ -207,8 +186,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
     }
   }
   if (!patched && verbose)
-    fprintf(stderr,
-            "DEADBEEF magic not found in payload; jump-back not patched.\n");
+    fprintf(stderr, "DEADBEEF magic not found in payload; jump-back not patched.\n");
 
   uint64_t elf_entry_offset = 0x18;
   if (lseek(fd, elf_entry_offset, SEEK_SET) < 0)
@@ -219,14 +197,12 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
     f_error("Writing injection", "Failed to patch e_entry");
 
   if (verbose)
-
-    fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
+    fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header->e_entry, new_entry);
 
 
   // ok im not sure this is needed; increases p_filesz and p_memsz, but the OS
   // might already load without that.
-  uint64_t ph_offset =
-      header->e_phoff + meta.text_segment_index * header->e_phentsize;
+  uint64_t ph_offset = header->e_phoff + meta.text_segment_index * header->e_phentsize;
   Elf64_Phdr phdr;
   if (lseek(fd, ph_offset, SEEK_SET) < 0)
     f_error("Write injection", "Failed to seek to program header");
@@ -250,6 +226,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
 
 int main(int argc, char **argv) {
   printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
-		read_elf(argv[1], 100);
+	read_elf(argv[1], 100);
   return 0;
 }
+
