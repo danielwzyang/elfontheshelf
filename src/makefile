@@ -11,7 +11,7 @@ default: target-bin
 	@$(CC) -c -Wall $(CMPF)
 	@$(CC) -Wall $(OBJS) -o $(FNAME)
 	@rm -rf $(OBJS)
-	@./$(FNAME) $(INJECT-TARGET)
+	@./$(FNAME) $(INJECT-TARGET) ../exec.bin
 
 target-bin:
 	@$(CC) -Wall test-bin.c -no-pie -o $(INJECT-TARGET)

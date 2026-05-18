@@ -26,23 +26,36 @@ void f_error(char *error, char *desc) {
   exit(1);
 }
 
-uint64_t read_elf(char *name, size_t prog_size){
-	/* READING ELF DATA:
-		fp 	(int) 					: file pointer
-		inf	(struct stat)		: memory stats 
-		mm	(const char *)	: memmory map with mmap
-			-> mmap exports file to string, with stats in inf
-	*/
+/* GENERATING MEMORY MAP:
+		mm		(const char *)	: memory map with mmap
+			-> mmap exports file to string
+		fname (char *)				: path name
+		size	(struct stat)		: size of memory
+*/
+int file_memmap(const char **mm, char *fname, size_t *size){
+	int fp = open(fname, O_RDONLY); 
+	struct stat inf;
+	if (fp < 0) return -1;
+	if (fstat(fp, &inf)) return -2;
+	*mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+
+	//if(verbose) fprintf(stderr, "ELF file opened successfully \n");
+
+	// close file
+	close(fp);
+	*size = inf.st_size;
+	return 0;
+}
+
+void mmclean(const char *mm, size_t size){
+	// cleaning up mapped memmory
+  munmap((void *)mm, size);
+}
+
+
+uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
 	if(prog_size == 0)
 		f_error("PAYLOAD", "Payload Size 0 Error");
-	int fp = open(name, O_RDONLY); 
-	struct stat inf;
-	if (fp < 0) 
-		f_error("OPEN ELF", "Failed to open elf file");
-	if (fstat(fp, &inf)) 
-		f_error("ELF STAT", "Unable to retreive stats of ELF file");
-	const char *mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
-	if(verbose) fprintf(stderr, "ELF file opened successfully \n");
 
   // Verifying authenticity & type of ELF file
   // verify authenticity
@@ -62,7 +75,6 @@ uint64_t read_elf(char *name, size_t prog_size){
            phsize (unsigned int)	: Elf program header size
            phnum (unsigned int)		: Elf program header quantity
   */
-  Elf64_Ehdr *header = (Elf64_Ehdr *)mm;
 
   if (header->e_phoff == 0)
     f_error("ELF Header", "ELF file Header struct brokeen?");
@@ -135,10 +147,6 @@ uint64_t read_elf(char *name, size_t prog_size){
 
 		}
 	}
-	// cleaning up memory
-	close(fp);
-
-  munmap((void *)mm, inf.st_size);
 
   return start;
 }
@@ -204,7 +212,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
   if (lseek(fd, ph_offset, SEEK_SET) < 0)
     f_error("Write injection", "Failed to seek to program header");
   if (read(fd, &phdr, sizeof(phdr)) != sizeof(phdr))
-    f_error("Write injection", "Failed to read program header");
+   f_error("Write injection", "Failed to read program header");
 
   phdr.p_filesz += payload_len;
   phdr.p_memsz += payload_len;
@@ -221,9 +229,38 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
 
 }
 
+
+/*
+void write_injection(char *target_path, Elf64_Ehdr *header,
+                     unsigned char *payload_data, uint32_t payload_len,
+                     struct InjectionMetadata meta) {
+
+*/
+
 int main(int argc, char **argv) {
   printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
-	read_elf(argv[1], 100);
+	if(argc < 3)
+		f_error("PROGRAM INPUT", "Not enough arguments.");
+
+	const char *target;
+	size_t target_size;
+	switch(file_memmap(&target, argv[1], &target_size)){
+		case -1: f_error("TARGET ELF FILE", "Target ELF file failed to open");
+		case -2: f_error("TARGET ELF FILE", "Target ELF stat failed to retrieve");
+	}
+  Elf64_Ehdr *header = (Elf64_Ehdr *) target;
+
+	const char *payload;
+	size_t payload_size;
+	switch(file_memmap(&payload, argv[2], &payload_size)){
+		case -1: f_error("PAYLOAD", "PAYLOAD failed to open");
+		case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
+	}
+
+	read_elf(target, header, payload_size);
+
+	mmclean(target, target_size);
+	mmclean(payload, payload_size);
   return 0;
 }
 
