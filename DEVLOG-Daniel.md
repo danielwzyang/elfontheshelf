@@ -32,3 +32,10 @@ My next step is to figure out how to download a payload from somewhere using HTT
 ### 2026-05-14: download payload
 I started to figure out how to use HTTP requests to try to download a binary from a web server that I'd host on the digital ocean droplet.
 I also added some syscalls like fchmod that I need to use to get the whole thing working.
+
+### 2026-05-15: use TCP instead of HTTP for the payload
+I got a simple bash script payload to work and now thereotically any executable can be ran.
+The program also quits if the execve fails.
+I also made changes to the makefile and the payloads to allow for custom IPs and ports rather than having them as hardcoded constants.
+I used built in make functions like subst to allow for string parsing through make only.
+

