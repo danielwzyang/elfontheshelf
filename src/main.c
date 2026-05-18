@@ -1,21 +1,28 @@
 #include "structs.h"
+#include <inttypes.h>
 
 /* THE FIRST PART:
-	https://www.conradk.com/elf-from-scratch/
-	https://linuxvox.com/blog/reading-the-contents-of-an-elf-section-programmatically/
-	https://www.man7.org/linux/man-pages/man5/elf.5.html
-	1. Read header
+        https://www.conradk.com/elf-from-scratch/
+        https://linuxvox.com/blog/reading-the-contents-of-an-elf-section-programmatically/
+        https://www.man7.org/linux/man-pages/man5/elf.5.html
+        1. Read header
 
 */
 
 // Coloured Error Printer
 
-
-int verbose = 1; 
+int verbose = 1;
 
 unsigned char placeholder_payload[] = {0x90, 0x90, 0x90, 0x90,
                                        0x90, 0x90, 0x90, 0x90};
 uint32_t placeholder_payload_size = sizeof(placeholder_payload);
+
+// not sure if this is needed, we might be able to put this somewhere else
+#define DEADBEEF_MAGIC 0xDEADBEEFDEADBEEFULL
+
+void write_injection(char *target_path, Elf64_Ehdr *header,
+                     unsigned char *payload_data, uint32_t payload_len,
+                     struct InjectionMetadata meta);
 
 void f_error(char *error, char *desc) {
   fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
@@ -23,6 +30,22 @@ void f_error(char *error, char *desc) {
   exit(1);
 }
 
+int read_elf(char *name) {
+  /* READING ELF DATA:
+          fp 	(int) 					: file pointer
+          inf	(struct stat)		: memory stats
+          mm	(const char *)	: memmory map with mmap
+                  -> mmap exports file to string, with stats in inf
+  */
+  int fp = open(name, O_RDONLY);
+  struct stat inf;
+  if (fp < 0)
+    f_error("OPEN ELF", "Failed to open elf file");
+  if (fstat(fp, &inf))
+    f_error("ELF STAT", "Unable to retreive stats of ELF file");
+  const char *mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+  if (verbose)
+    fprintf(stderr, "ELF file opened successfully \n");
 
 uint64_t read_elf(char *name, size_t prog_size){
 	/* READING ELF DATA:
@@ -40,28 +63,34 @@ uint64_t read_elf(char *name, size_t prog_size){
 	const char *mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
 	if(verbose) fprintf(stderr, "ELF file opened successfully \n");
 
-	// END READ 
+  // Verifying authenticity & type of ELF file
+  // verify authenticity
+  if (mm[EI_MAG0] != ELFMAG0 || mm[EI_MAG1] != ELFMAG1 ||
+      mm[EI_MAG2] != ELFMAG2 || mm[EI_MAG3] != ELFMAG3)
+    f_error("ELF FILE",
+            "Binary is not an ELF file, failed ELF header validation");
+  // verify 64 bit
+  if (mm[EI_CLASS] != ELFCLASS64)
+    f_error("ELF FILE", "Binary is not 64 bit, failed ELF header validation");
+  else if (verbose)
+    fprintf(stderr, "ELF file verified.\n\n");
+  // END VERIFY
 
+  /* ELF header
+           header (Elf64_Ehdr)		: Elf header, contains info about binary
+           phsize (unsigned int)	: Elf program header size
+           phnum (unsigned int)		: Elf program header quantity
+  */
+  Elf64_Ehdr *header = (Elf64_Ehdr *)mm;
 
-	// Verifying authenticity & type of ELF file
-		// verify authenticity
-	if( mm[EI_MAG0] != ELFMAG0 ||
-			mm[EI_MAG1] != ELFMAG1 ||
-			mm[EI_MAG2] != ELFMAG2 ||
-			mm[EI_MAG3] != ELFMAG3   )
-		f_error("ELF FILE", "Binary is not an ELF file, failed ELF header validation");
-		// verify 64 bit
-	if( mm[EI_CLASS] != ELFCLASS64 )
-		f_error("ELF FILE", "Binary is not 64 bit, failed ELF header validation");
-	else if(verbose) fprintf(stderr, "ELF file verified.\n\n");
-	// END VERIFY
-		
-	/* ELF header
-		 header (Elf64_Ehdr)		: Elf header, contains info about binary
-		 phsize (unsigned int)	: Elf program header size
-		 phnum (unsigned int)		: Elf program header quantity
-	*/
-	Elf64_Ehdr *header = (Elf64_Ehdr *) mm;
+  if (header->e_phoff == 0)
+    f_error("ELF Header", "ELF file Header struct brokeen?");
+  else if (header->e_shoff == 0)
+    f_error("ELF Header", "ELF Section Header struct brokeen?");
+  else if (verbose) {
+    fprintf(stderr, "Elf file header byte pos: %lu\n", header->e_phoff);
+    // fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
+  }
 
 	if( header->e_phoff == 0 )
 		f_error("ELF Header", "ELF file Header struct broken");
@@ -128,13 +157,20 @@ uint64_t read_elf(char *name, size_t prog_size){
 	}
 	// cleaning up memory
 	close(fp);
+
   munmap((void *)mm, inf.st_size);
 
   return start;
 }
 
-void write_injection(char *target_path, struct Elf64_Header header,
+void write_injection(char *target_path, Elf64_Ehdr *header,
+                     unsigned char *payload_data, uint32_t payload_len,
                      struct InjectionMetadata meta) {
+  if (payload_len == 0) {
+    payload_data = placeholder_payload;
+    payload_len = placeholder_payload_size;
+  }
+
   int fd = open(target_path, O_RDWR);
   if (fd < 0)
     f_error("Write injection", "Failed to open target binary for writing");
@@ -142,30 +178,37 @@ void write_injection(char *target_path, struct Elf64_Header header,
   if (lseek(fd, meta.target_padding_offset, SEEK_SET) < 0)
     f_error("Write injection", "Failed to seek to padding offset");
 
-  unsigned char *payload = placeholder_payload;
-  uint32_t payload_len =
-      meta.payload_size > 0 ? meta.payload_size : placeholder_payload_size;
-
-  if (write(fd, payload, payload_len) != (ssize_t)payload_len)
+  if (write(fd, payload_data, payload_len) != (ssize_t)payload_len)
     f_error("Write injection", "Failed to write payload");
 
   if (verbose)
-   fprintf(stderr, "[+] Wrote %u bytes of payload at file offset 0x%lx\n", payload_len, meta.target_padding_offset);
+    fprintf(stderr, "Wrote %u bytes of payload at file offset 0x%lx\n",
+            payload_len, meta.target_padding_offset);
 
-  
-  unsigned char jmp_stub[12];
-  jmp_stub[0] = 0x48;
-  jmp_stub[1] = 0xb8;
-  memcpy(&jmp_stub[2], &meta.original_entry, 8);
-  jmp_stub[10] = 0xff;
-  jmp_stub[11] = 0xe0;
+  int patched = 0;
+  for (uint32_t i = 0; i + 8 <= payload_len; ++i) {
+    uint64_t candidate;
+    memcpy(&candidate, payload_data + i, 8);
+    if (candidate == DEADBEEF_MAGIC) {
 
-  if (write(fd, jmp_stub, sizeof(jmp_stub)) != sizeof(jmp_stub))
-    f_error("Write injection", "Failed to write jump-back stub");
-
-  if (verbose)
-    fprintf(stderr, "targets original entry 0x%lx\n",
-           meta.original_entry);
+      off_t patch_off = (off_t)(meta.target_padding_offset + i);
+      if (lseek(fd, patch_off, SEEK_SET) < 0)
+        f_error("Write injection", "Failed to seek to DEADBEEF patch site");
+      if (write(fd, &meta.original_entry, 8) != 8)
+        f_error("Write injection",
+                "Failed to patch DEADBEEF with original entry");
+      if (verbose)
+        fprintf(stderr,
+                "Patched DEADBEEF placeholder at payload+%u -> original "
+                "entry 0x%lx\n",
+                i, meta.original_entry);
+      patched = 1;
+      break;
+    }
+  }
+  if (!patched && verbose)
+    fprintf(stderr,
+            "DEADBEEF magic not found in payload; jump-back not patched.\n");
 
   uint64_t elf_entry_offset = 0x18;
   if (lseek(fd, elf_entry_offset, SEEK_SET) < 0)
@@ -176,7 +219,33 @@ void write_injection(char *target_path, struct Elf64_Header header,
     f_error("Writing injection", "Failed to patch e_entry");
 
   if (verbose)
+
     fprintf(stderr, "Patched e_entry: 0x%lx -> 0x%lx\n", header.e_entry, new_entry);
+
+
+  // ok im not sure this is needed; increases p_filesz and p_memsz, but the OS
+  // might already load without that.
+  uint64_t ph_offset =
+      header->e_phoff + meta.text_segment_index * header->e_phentsize;
+  Elf64_Phdr phdr;
+  if (lseek(fd, ph_offset, SEEK_SET) < 0)
+    f_error("Write injection", "Failed to seek to program header");
+  if (read(fd, &phdr, sizeof(phdr)) != sizeof(phdr))
+    f_error("Write injection", "Failed to read program header");
+
+  phdr.p_filesz += payload_len;
+  phdr.p_memsz += payload_len;
+
+  if (lseek(fd, ph_offset, SEEK_SET) < 0)
+    f_error("Write injection", "Failed to seek back to program header");
+  if (write(fd, &phdr, sizeof(phdr)) != sizeof(phdr))
+    f_error("Write injection", "Failed to patch program header");
+
+  if (verbose)
+    fprintf(stderr, "Patched program header %d: increased size by %u\n",
+            meta.text_segment_index, payload_len);
+  close(fd);
+
 }
 
 int main(int argc, char **argv) {
