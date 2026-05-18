@@ -1,16 +1,20 @@
 #ifndef STRUCT_H
 #define STRUCT_H
 
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <sys/stat.h>
-	#include <sys/mman.h>
-	#include <sys/types.h>
-	#include <string.h>
-	#include <unistd.h>
-	#include <fcntl.h>
-	#include <elf.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#ifdef __APPLE__
+#include <libelf/gelf.h>
+#else
+#include <elf.h>
+#endif
 
 struct Elf64_Header {
   uint16_t e_type;
@@ -35,6 +39,5 @@ struct InjectionMetadata {
   uint32_t payload_size;
   int text_segment_index;
 };
-
 
 #endif
