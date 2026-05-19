@@ -37,5 +37,5 @@ test_payload:
 
 clean:
 	@rm -vf injector target
-	@find . -type f -name "*.bin" -print -exec rm -rf {} +
+	@find . -type f -name "*.bin" -exec rm -vrf {} +
 
