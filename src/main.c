@@ -32,12 +32,12 @@ void f_error(char *error, char *desc) {
 		fname (char *)				: path name
 		size	(struct stat)		: size of memory
 */
-int file_memmap(const char **mm, char *fname, size_t *size){
+int file_memmap(const char **mm, char *fname, size_t *size, int perm){
 	int fp = open(fname, O_RDONLY); 
 	struct stat inf;
 	if (fp < 0) return -1;
 	if (fstat(fp, &inf)) return -2;
-	*mm = mmap(NULL, inf.st_size, PROT_READ, MAP_PRIVATE, fp, 0);
+	*mm = mmap(NULL, inf.st_size, perm, MAP_PRIVATE, fp, 0);
 
 	//if(verbose) fprintf(stderr, "ELF file opened successfully \n");
 
@@ -228,9 +228,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, un
 
 
 /*
-void write_injection(char *target_path, Elf64_Ehdr *header,
-                     unsigned char *payload_data, uint32_t payload_len,
-                     struct InjectionMetadata meta) {
+void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr,unsigned char *payload_data, uint32_t payload_len, struct InjectionMetadata meta) {
 
 */
 
@@ -241,7 +239,7 @@ int main(int argc, char **argv) {
 
 	const char *target;
 	size_t target_size;
-	switch(file_memmap(&target, argv[1], &target_size)){
+	switch(file_memmap(&target, argv[1], &target_size, PROT_READ | PROT_WRITE)){
 		case -1: f_error("TARGET ELF FILE", "Target ELF file failed to open");
 		case -2: f_error("TARGET ELF FILE", "Target ELF stat failed to retrieve");
 	}
@@ -250,7 +248,7 @@ int main(int argc, char **argv) {
 
 	const char *payload;
 	size_t payload_size;
-	switch(file_memmap(&payload, argv[2], &payload_size)){
+	switch(file_memmap(&payload, argv[2], &payload_size, PROT_READ)){
 		case -1: f_error("PAYLOAD", "PAYLOAD failed to open");
 		case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
 	}
