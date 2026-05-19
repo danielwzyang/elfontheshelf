@@ -1,9 +1,13 @@
 .PHONY: default injector target test_payload clean
 
+INJECTOR_FLAGS := 
+ifdef VERBOSE
+INJECTOR_FLAGS += -v
+endif
+
 ASM := payloads/exec.asm
 
 NASM_FLAGS :=
-
 ifdef IP
 NASM_FLAGS += -DIPADDR=$(shell printf '0x%02X%02X%02X%02X' $(subst ., ,$(IP))) # replace periods with commas and change to proper endian
 endif
@@ -12,7 +16,7 @@ NASM_FLAGS += -DPORT=$(shell printf '0x%02X%02X' $$(($(PORT) & 0xFF)) $$(($(PORT
 endif
 
 default: injector target payload
-	@./injector target $(basename $(notdir $(ASM))).bin
+	@./injector $(INJECTOR_FLAGS) target $(basename $(notdir $(ASM))).bin
 	@echo "Injection complete. Run ./target"
 
 injector:
