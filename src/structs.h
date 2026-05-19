@@ -26,7 +26,7 @@ struct InjectionMetadata {
 };
 
 void f_error(char *error, char *desc);
-int file_memmap(const char **mm, char *fname, size_t *size, int perm);
+int file_memmap(char **mm, char *fname, size_t *size, int perm);
 void mmclean(const char *mm, size_t size);
 
 
