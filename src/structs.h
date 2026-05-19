@@ -17,18 +17,12 @@
 #include <elf.h>
 #endif
 
-struct InjectionMetadata {
-  uint64_t target_padding_offset;
-  uint64_t target_vaddr;
-  uint64_t original_entry;
-  uint32_t payload_size;
-  int text_segment_index;
-};
+#define JMP_INSTRUCTION_SIZE 5
 
-void f_error(char *error, char *desc);
-int file_memmap(char **mm, char *fname, size_t *size, int perm);
+extern int verbose; // extern = global basically
+
+void f_error(const char *error, const char *desc);
+int file_memmap(char **mm, const char *fname, size_t *size, int perm);
 void mmclean(const char *mm, size_t size);
-
-
 
 #endif

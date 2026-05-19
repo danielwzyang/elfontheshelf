@@ -1,8 +1,8 @@
 # temporary makefile to do intermittent testing
 
 CC := gcc
-CMPF := main.c structs.c
-OBJS := main.o structs.o
+CMPF := main.c helpers.c
+OBJS := main.o helpers.o
 FNAME := injector.pro
 INJECT-TARGET := target.pro
 
