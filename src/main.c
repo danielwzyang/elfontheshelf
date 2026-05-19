@@ -1,5 +1,4 @@
 #include "structs.h"
-#include <inttypes.h>
 
 /* THE FIRST PART:
         https://www.conradk.com/elf-from-scratch/
@@ -18,40 +17,6 @@ uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 
 // not sure if this is needed, we might be able to put this somewhere else
 #define DEADBEEF_MAGIC 0xDEADBEEFDEADBEEFULL
-
-
-void f_error(char *error, char *desc) {
-  fprintf(stderr, "\e[1;91m%s:\e[0m\n", error);
-  fprintf(stderr, "\e[0;91m\t|%s\e[0m\n", desc);
-  exit(1);
-}
-
-/* GENERATING MEMORY MAP:
-		mm		(const char *)	: memory map with mmap
-			-> mmap exports file to string
-		fname (char *)				: path name
-		size	(struct stat)		: size of memory
-*/
-int file_memmap(const char **mm, char *fname, size_t *size, int perm){
-	int fp = open(fname, O_RDONLY); 
-	struct stat inf;
-	if (fp < 0) return -1;
-	if (fstat(fp, &inf)) return -2;
-	*mm = mmap(NULL, inf.st_size, perm, MAP_PRIVATE, fp, 0);
-
-	//if(verbose) fprintf(stderr, "ELF file opened successfully \n");
-
-	// close file
-	close(fp);
-	*size = inf.st_size;
-	return 0;
-}
-
-void mmclean(const char *mm, size_t size){
-	// cleaning up mapped memmory
-  munmap((void *)mm, size);
-}
-
 
  /* ELF header
 					mm				(const char *)	: memory map with mmap
@@ -150,7 +115,7 @@ uint64_t read_elf(const char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_
 }
 
 
-void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, unsigned char *payload_data, uint32_t payload_len, struct InjectionMetadata meta) {
+void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, const char *payload_data, size_t payload_len, struct InjectionMetadata meta) {
   int fd = open(target_path, O_RDWR);
   if (fd < 0)
     f_error("Write injection", "Failed to open target binary for writing");
@@ -162,7 +127,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, un
     f_error("Write injection", "Failed to write payload");
 
   if (verbose)
-    fprintf(stderr, "Wrote %u bytes of payload at file offset 0x%lx\n",
+    fprintf(stderr, "Wrote %lu bytes of payload at file offset 0x%lx\n",
             payload_len, meta.target_padding_offset);
 
   int patched = 0;
@@ -220,7 +185,7 @@ void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, un
     f_error("Write injection", "Failed to patch program header");
 
   if (verbose)
-    fprintf(stderr, "Patched program header %d: increased size by %u\n",
+    fprintf(stderr, "Patched program header %d: increased size by %lu\n",
             meta.text_segment_index, payload_len);
   close(fd);
 
@@ -253,7 +218,7 @@ int main(int argc, char **argv) {
 		case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
 	}
 
-	read_elf(target, header, pheader, payload_size);
+	off_t inject_head = read_elf(target, header, pheader, payload_size);
 
 	mmclean(target, target_size);
 	mmclean(payload, payload_size);

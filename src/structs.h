@@ -9,28 +9,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #ifdef __APPLE__
 #include <libelf/gelf.h>
 #else
 #include <elf.h>
 #endif
-
-struct Elf64_Header {
-  uint16_t e_type;
-  uint16_t e_machine;
-  uint32_t e_version;
-  uint64_t e_entry;
-  uint64_t e_phoff;
-  uint64_t e_shoff;
-  uint32_t e_flags;
-  uint16_t e_ehsize;
-  uint16_t e_phentsize;
-  uint16_t e_phnum;
-  uint16_t e_shentsize;
-  uint16_t e_shnum;
-  uint16_t e_shstrndx;
-};
 
 struct InjectionMetadata {
   uint64_t target_padding_offset;
@@ -39,5 +24,11 @@ struct InjectionMetadata {
   uint32_t payload_size;
   int text_segment_index;
 };
+
+void f_error(char *error, char *desc);
+int file_memmap(const char **mm, char *fname, size_t *size, int perm);
+void mmclean(const char *mm, size_t size);
+
+
 
 #endif
