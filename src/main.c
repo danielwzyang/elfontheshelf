@@ -24,7 +24,9 @@ uint32_t placeholder_payload_size = sizeof(placeholder_payload);
 		 			pheader 	(Elf64_Phdr) 		: Array of programs
           prog_size	(size_t)				: Payload size
  */
+
 int read_elf(char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t prog_size){
+	if(verbose) fprintf(stderr, "\n>>>> Starting READ: <<<<\n\n");
 	if(prog_size == 0)
 		f_error("PAYLOAD", "Payload Size 0 Error");
 
@@ -38,27 +40,13 @@ int read_elf(char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t prog_size
   if (mm[EI_CLASS] != ELFCLASS64)
     f_error("ELF FILE", "Binary is not 64 bit, failed ELF header validation");
   else if (verbose)
-    fprintf(stderr, "ELF file verified.\n\n");
+    fprintf(stderr, "Target ELF file verified.\n");
   // END VERIFY
-
-
-  if (header->e_phoff == 0)
-    f_error("ELF Header", "ELF file Header struct brokeen?");
-  else if (header->e_shoff == 0)
-    f_error("ELF Header", "ELF Section Header struct brokeen?");
-  else if (verbose) {
-    fprintf(stderr, "Elf file header byte pos: %lu\n", header->e_phoff);
-    // fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
-  }
 
 	if( header->e_phoff == 0 )
 		f_error("ELF Header", "ELF file Header struct broken");
 	else if( header->e_shoff == 0 )
 		f_error("ELF Header", "ELF Section Header struct broken");
-	else if(verbose){
-		fprintf(stderr, "Elf file header byte pos: %lu\n", header->e_phoff);
-		//fprintf(stderr, "Elf section header byte pos: %lu\n", header->e_shoff);
-	}
 	
 	unsigned int phnum = header->e_phnum;
 	if(verbose){
@@ -124,7 +112,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *p
 	off_t offset = header->e_entry - (entry_pos + payload_len);
 
 	if(verbose){
-		fprintf(stderr, "\n\tStarting WRITE:\n\n");
+		fprintf(stderr, "\n>>>> Starting WRITE: <<<<\n\n");
 		fprintf(stderr, "Injection position:          0x%lx\n", inj_pos);
 		fprintf(stderr, "Original entry point:        0x%lx\n", header->e_entry);
 		fprintf(stderr, "New entry point position:    0x%lx\n", entry_pos);
@@ -149,16 +137,20 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *p
 	// increasing program header file sizes
 	phdr[ph_num].p_filesz += payload_len;
 	phdr[ph_num].p_memsz += payload_len;
+
+	if(verbose)
+		fprintf(stderr, "\nFinished injection. Exiting.\n\n");
 }
 
 
 int main(int argc, char **argv) {
-  printf("ELF Injector Initiated, Target binary: \"%s\"\n", argv[1]);
+  printf("ELF Injector Initiated\n\n");
 	if(argc < 3)
 		f_error("PROGRAM INPUT", "Not enough arguments.");
 
 	char *target;
 	size_t target_size;
+	if(verbose) fprintf(stderr, "Opening target ELF, \"%s\"\n", argv[1]);
 	switch(file_memmap(&target, argv[1], &target_size, PROT_READ | PROT_WRITE)){
 		case -1: f_error("TARGET ELF FILE", "Target ELF file failed to open");
 		case -2: f_error("TARGET ELF FILE", "Target ELF stat failed to retrieve");
@@ -168,6 +160,7 @@ int main(int argc, char **argv) {
 
 	char *payload;
 	size_t payload_size;
+	if(verbose) fprintf(stderr, "Opening payload binary, \"%s\"\n", argv[2]);
 	switch(file_memmap(&payload, argv[2], &payload_size, PROT_READ)){
 		case -1: f_error("PAYLOAD", "PAYLOAD failed to open");
 		case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
