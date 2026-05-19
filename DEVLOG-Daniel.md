@@ -44,3 +44,8 @@ I started to update the README with instructions on how to use the programs.
 I mainly focused on documenting what the payloads do and how to compile them using the make targets.
 I also gave instructions on how to exploit the payloads once they run.
 
+### 2026-05-19: fixing injector
+I worked on fixing the injector with the segfault issues and the code not working in general.
+We worked together to debug in class and I reformatted a lot of the code and organized it after getting it to work.
+Additionally I completed the makefile by adding the targets necessary to use the injector.
+
