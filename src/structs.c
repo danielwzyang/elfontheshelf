@@ -13,7 +13,7 @@ void f_error(char *error, char *desc) {
 		fname (char *)				: path name
 		size	(struct stat)		: size of memory
 */
-int file_memmap(const char **mm, char *fname, size_t *size, int perm){
+int file_memmap(char **mm, char *fname, size_t *size, int perm){
 	int fp = open(fname, O_RDONLY);
 	struct stat inf;
 	if (fp < 0) return -1;
