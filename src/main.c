@@ -106,7 +106,7 @@ int read_elf(char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t prog_size
 
 void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *payload_data, size_t payload_len, int ph_num) {
 
-	uint64_t inj_pos = phdr[ph_num].p_offset + phdr[ph_num].p_filesz;
+	Elf64_Addr inj_pos = (Elf64_Addr) (phdr[ph_num].p_offset + phdr[ph_num].p_filesz);
 	uint64_t entry_pos = phdr[ph_num].p_vaddr + phdr[ph_num].p_filesz;
 	// offset of virtual memory to write to
 	off_t offset = header->e_entry - (entry_pos + payload_len);
@@ -128,7 +128,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, char *p
 		f_error("JMP", "Relative jmp >2gb, unable to perform jump");
 
 	// setting entry point to the injection
-	header->e_entry = inj_pos;
+	header->e_entry = entry_pos;
 	
 	// writing payload to target
 	memcpy(target + inj_pos, payload_data, payload_len);
@@ -171,8 +171,9 @@ int main(int argc, char **argv) {
 	if(ph_num < 0) f_error("ELF Reader", "Failed to find injection point!");
 	write_injection(target, header, pheader, payload, payload_size, ph_num);
 
+	msync(target, payload_size, MS_SYNC);
+
 	mmclean(target, target_size);
 	mmclean(payload, payload_size);
   return 0;
 }
-

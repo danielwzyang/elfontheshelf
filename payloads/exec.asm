@@ -27,13 +27,9 @@ _start:
     xor rdi, rdi
     syscall
 
-original:
-    mov rax, 0xDEADBEEFDEADBEEF
-    jmp rax
-
-path:
-    db "/usr/bin/ls", 0
+path: db "/usr/bin/ls", 0
 
 flag:
     db "-lah", 0
 
+original:

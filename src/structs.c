@@ -13,12 +13,18 @@ void f_error(char *error, char *desc) {
 		fname (char *)				: path name
 		size	(struct stat)		: size of memory
 */
+
 int file_memmap(char **mm, char *fname, size_t *size, int perm){
-	int fp = open(fname, O_RDONLY);
+	int fp = open(fname, O_RDWR);
 	struct stat inf;
 	if (fp < 0) return -1;
 	if (fstat(fp, &inf)) return -2;
-	*mm = mmap(NULL, inf.st_size, perm, MAP_PRIVATE, fp, 0);
+	*mm = mmap(NULL, inf.st_size, perm, MAP_SHARED, fp, 0);
+	if(mm == MAP_FAILED){
+		printf("ERROR\n\n");
+		exit(1);
+
+	}
 
 	//if(verbose) fprintf(stderr, "ELF file opened successfully \n");
 
