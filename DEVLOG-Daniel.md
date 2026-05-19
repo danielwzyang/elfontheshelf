@@ -48,4 +48,5 @@ I also gave instructions on how to exploit the payloads once they run.
 I worked on fixing the injector with the segfault issues and the code not working in general.
 We worked together to debug in class and I reformatted a lot of the code and organized it after getting it to work.
 Additionally I completed the makefile by adding the targets necessary to use the injector.
+I also worked on the README by completing the instructions to outline how to use the different targets as well as completing the description.
 
