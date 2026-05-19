@@ -53,7 +53,13 @@ void mmclean(const char *mm, size_t size){
 }
 
 
-uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
+ /* ELF header
+					mm				(const char *)	: memory map with mmap
+          header		(Elf64_Ehdr)		: Elf header, contains info about binary
+		 			pheader 	(Elf64_Phdr) 		: Array of programs
+          prog_size	(size_t)				: Payload size
+ */
+uint64_t read_elf(const char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t prog_size){
 	if(prog_size == 0)
 		f_error("PAYLOAD", "Payload Size 0 Error");
 
@@ -70,11 +76,6 @@ uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
     fprintf(stderr, "ELF file verified.\n\n");
   // END VERIFY
 
-  /* ELF header
-           header (Elf64_Ehdr)		: Elf header, contains info about binary
-           phsize (unsigned int)	: Elf program header size
-           phnum (unsigned int)		: Elf program header quantity
-  */
 
   if (header->e_phoff == 0)
     f_error("ELF Header", "ELF file Header struct brokeen?");
@@ -110,11 +111,7 @@ uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
 		*/
 	}
 
-	/* Program Header
-		 pheader (Elf64_Phdr) : Array of programs
-	*/
 
-	Elf64_Phdr const *pheader = (Elf64_Phdr *) (mm + header->e_phoff);
 	uint64_t start;
 
 	for(int i = 0; i < phnum; ++i){
@@ -140,11 +137,12 @@ uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
 			nh--;
 			if(prog_size > nh-start)
 				f_error("PAYLOAD", "Not enough padding, payload too large!");
-			fprintf(stderr, "\n");
-			fprintf(stderr, "START BYTE:   0x%lx\n", start);
-			fprintf(stderr, "END BYTE:     0x%lx\n", nh);
-			fprintf(stderr, "BYTES SIZE:   %lu\n", nh - start);
-
+			if(verbose){
+				fprintf(stderr, "\n");
+				fprintf(stderr, "START BYTE:   0x%lx\n", start);
+				fprintf(stderr, "END BYTE:     0x%lx\n", nh);
+				fprintf(stderr, "BYTES SIZE:   %lu\n", nh - start);
+			}
 		}
 	}
 
@@ -152,9 +150,7 @@ uint64_t read_elf(const char *mm, Elf64_Ehdr *header, size_t prog_size){
 }
 
 
-void write_injection(char *target_path, Elf64_Ehdr *header,
-                     unsigned char *payload_data, uint32_t payload_len,
-                     struct InjectionMetadata meta) {
+void write_injection(char *target_path, Elf64_Ehdr *header, Elf64_Phdr *phdr, unsigned char *payload_data, uint32_t payload_len, struct InjectionMetadata meta) {
   int fd = open(target_path, O_RDWR);
   if (fd < 0)
     f_error("Write injection", "Failed to open target binary for writing");
@@ -208,15 +204,16 @@ void write_injection(char *target_path, Elf64_Ehdr *header,
   // ok im not sure this is needed; increases p_filesz and p_memsz, but the OS
   // might already load without that.
   uint64_t ph_offset = header->e_phoff + meta.text_segment_index * header->e_phentsize;
-  Elf64_Phdr phdr;
   if (lseek(fd, ph_offset, SEEK_SET) < 0)
     f_error("Write injection", "Failed to seek to program header");
   if (read(fd, &phdr, sizeof(phdr)) != sizeof(phdr))
    f_error("Write injection", "Failed to read program header");
 
+/*
   phdr.p_filesz += payload_len;
   phdr.p_memsz += payload_len;
 
+*/
   if (lseek(fd, ph_offset, SEEK_SET) < 0)
     f_error("Write injection", "Failed to seek back to program header");
   if (write(fd, &phdr, sizeof(phdr)) != sizeof(phdr))
@@ -249,6 +246,7 @@ int main(int argc, char **argv) {
 		case -2: f_error("TARGET ELF FILE", "Target ELF stat failed to retrieve");
 	}
   Elf64_Ehdr *header = (Elf64_Ehdr *) target;
+	Elf64_Phdr *pheader = (Elf64_Phdr *) (target + header->e_phoff);
 
 	const char *payload;
 	size_t payload_size;
@@ -257,7 +255,7 @@ int main(int argc, char **argv) {
 		case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
 	}
 
-	read_elf(target, header, payload_size);
+	read_elf(target, header, pheader, payload_size);
 
 	mmclean(target, target_size);
 	mmclean(payload, payload_size);
