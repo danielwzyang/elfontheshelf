@@ -39,3 +39,8 @@ The program also quits if the execve fails.
 I also made changes to the makefile and the payloads to allow for custom IPs and ports rather than having them as hardcoded constants.
 I used built in make functions like subst to allow for string parsing through make only.
 
+### 2026-05-18: updating README
+I started to update the README with instructions on how to use the programs.
+I mainly focused on documenting what the payloads do and how to compile them using the make targets.
+I also gave instructions on how to exploit the payloads once they run.
+
