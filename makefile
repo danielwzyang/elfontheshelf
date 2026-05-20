@@ -6,7 +6,8 @@ ASM := payloads/exec.asm
 
 NASM_FLAGS :=
 ifdef IP
-NASM_FLAGS += -DIPADDR=$(shell printf '0x%02X%02X%02X%02X' $(subst ., ,$(IP))) # replace periods with commas and change to proper endian
+# replace periods with commas and change to proper endian
+NASM_FLAGS += -DIPADDR=$(shell echo $(IP) | awk -F. '{printf "0x%02X%02X%02X%02X", $$4, $$3, $$2, $$1}') 
 endif
 ifdef PORT
 NASM_FLAGS += -DPORT=$(shell printf '0x%02X%02X' $$(($(PORT) & 0xFF)) $$(($(PORT) >> 8))) # change to proper endian
