@@ -1,9 +1,6 @@
 .PHONY: default injector target test_payload clean
 
 INJECTOR_FLAGS := 
-ifdef VERBOSE
-INJECTOR_FLAGS += -v
-endif
 
 ASM := payloads/exec.asm
 
@@ -15,15 +12,25 @@ ifdef PORT
 NASM_FLAGS += -DPORT=$(shell printf '0x%02X%02X' $$(($(PORT) & 0xFF)) $$(($(PORT) >> 8))) # change to proper endian
 endif
 
-default: injector target payload
-	@./injector $(INJECTOR_FLAGS) target $(basename $(notdir $(ASM))).bin
-	@echo "Injection complete. Run ./target"
+BINARY := target
+
+default: injector $(BINARY) payload
+ifdef VERBOSE
+	@./injector -v $(BINARY) $(basename $(notdir $(ASM))).bin
+else
+	@./injector $(BINARY) $(basename $(notdir $(ASM))).bin
+endif
+	@echo "Injection complete. Run ./$(BINARY)"
 
 injector:
 	@gcc -Wall src/main.c src/helpers.c -o injector
 
 target:
+ifdef PIE
+	@gcc -Wall -fPIE -pie src/test-bin.c -o target
+else
 	@gcc -Wall -no-pie src/test-bin.c -o target
+endif
 
 payload:
 	@nasm -f elf64 $(NASM_FLAGS) -o $(basename $(ASM)).o $(ASM)

