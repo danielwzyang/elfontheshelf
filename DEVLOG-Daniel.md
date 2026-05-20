@@ -50,3 +50,7 @@ We worked together to debug in class and I reformatted a lot of the code and org
 Additionally I completed the makefile by adding the targets necessary to use the injector.
 I also worked on the README by completing the instructions to outline how to use the different targets as well as completing the description.
 
+### 2026-05-20: fixing makefile + script
+I noticed that the IP address input had a bug with the endianness in the makefile so I switched to awk to fix the formatting.
+I also continued working on the script for the video.
+
