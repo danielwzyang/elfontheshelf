@@ -74,6 +74,7 @@ To customize your injection you can use the following parameters:
 - IP: set the address for reverse_shell and download
 - PORT: set the port for reverse_shell, download, and bind_shell (default: 9000)
 - BINARY: specify what binary to inject
+- PIE: if a binary isn't specified then the test binary will be compiled with no-pie unless PIE=1
 
 An example of a custom injection can be:
 
