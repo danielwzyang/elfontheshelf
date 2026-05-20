@@ -24,6 +24,7 @@ Dependencies:
 - ld 
 - nasm
 - make
+- awk
 
 Please also note that the payloads are written for the x86_64 architecture.
 Running these on ARM will not work unless you use an emulator.
