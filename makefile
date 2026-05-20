@@ -16,9 +16,9 @@ BINARY := target
 
 default: injector $(BINARY) payload
 ifdef VERBOSE
-	@./injector -v $(BINARY) $(basename $(notdir $(ASM))).bin
+	@./injector -v -t $(BINARY) -p $(basename $(notdir $(ASM))).bin
 else
-	@./injector $(BINARY) $(basename $(notdir $(ASM))).bin
+	@./injector -t $(BINARY) -p $(basename $(notdir $(ASM))).bin
 endif
 	@echo "Injection complete. Run ./$(BINARY)"
 
