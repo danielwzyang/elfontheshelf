@@ -7,11 +7,13 @@ FNAME := injector.pro
 INJECT-TARGET := target.pro
 
 
-default: target-bin
+default: target-bin injector
+	@./$(FNAME) -t $(INJECT-TARGET) -p ../exec.bin
+
+injector: 
 	@$(CC) -c -Wall $(CMPF)
 	@$(CC) -Wall $(OBJS) -o $(FNAME)
 	@rm -rf $(OBJS)
-	@./$(FNAME) -t $(INJECT-TARGET) -p ../exec.bin
 
 target-bin:
 	@$(CC) -Wall test-bin.c -no-pie -o $(INJECT-TARGET)

