@@ -13,10 +13,12 @@ void parse_args(int argc, char **argv, char **target, char **payload){
 	for(int i = 0; i < argc; ++i){
 		if(!strcmp(argv[i], "-p")){ 
 			if(i+1 > argc) goto no_pay_error; 
-			*payload = argv[i+1];
+			i ++;
+			*payload = argv[i];
 		}else if(!strcmp(argv[i], "-t")){
 			if(i+1 > argc) goto no_tar_error;
-			*target = argv[i+1];
+			i ++;
+			*target = argv[i];
 		}
 		if(!strcmp(argv[i], "-v")) verbose ++;
 	}

@@ -27,11 +27,7 @@ injector:
 	@gcc -Wall src/main.c src/helpers.c -o injector
 
 target:
-ifdef PIE
 	@gcc -Wall -fPIE -pie src/test-bin.c -o target
-else
-	@gcc -Wall -no-pie src/test-bin.c -o target
-endif
 
 payload:
 	@nasm -f elf64 $(NASM_FLAGS) -o $(basename $(ASM)).o $(ASM)
