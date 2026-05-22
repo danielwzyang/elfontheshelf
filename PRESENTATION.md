@@ -1,7 +1,8 @@
 ### Presentation format (Taken from Google Docs script structure template)
+# PRESENTATION SCRIPT TOPIC ORDER
 
 # How ELF works + layout
-- Used by linux
+ Used by linux
 - Divided into sections
 - Program header table tells the OS how to load the file into memory
 - Entry point field tells the OS where to start executing instructions
@@ -21,16 +22,8 @@
 # Assembly + Syscalls
 - Linux exposes some kernel functions through syscalls
 - Assembly allows you to call them without any libraries or dependencies
-- In x86_64 assembly you can trigger one using the syscall instruction
+- In x86\_64 assembly you can trigger one using the syscall instruction
 - This is how the payloads do everything including opening sockets, running executables, and downloading files
- 
-# Virtual Memory, ASLR, No-PIE
-- The kernel will give every process its own space in virtual memory
-- ASLR will randomize where the code is stored in memory each time
-- For the kernel ASLR is enabled by default meaning shared libraries will be loaded in random addresses
-- This isn’t on for binaries by default, but a binary can be denoted as a PIE (position independent executable) which will enable ASLR for itself
-- Our hardcoded jump addresses will only work if the binary loads at a fixed address or if the injected payload is in the same pagesegment as the original entry point
-- This is why we compile our target with no pie (but it will also work with pie in certain cases)
  
 # Demo (download payload)
 - Show the unmodified target binary running normally
@@ -44,14 +37,19 @@
 - This download payload is tiny since it just opens up a socket, reads the bytes, and writes it to a file before executing it
 - This gives the attacker basically unlimited complexity
  
-# Why this is mostly not a problem in today’s world
-- PIE is enabled by default on modern Linux distributions
-- ASLR makes hardcoded address unreliable
+# Why this might still be a problem in today's world
+- ASLR is good for preventing programs from accessing shared memory but it doesn't stop ELF injection
+- The kernel will give every process its own space in virtual memory
+- ASLR will randomize where the code is stored in memory each time
+- For the kernel ASLR is enabled by default meaning shared libraries will be loaded in random addresses
+- This isn’t on for binaries by default, but a binary can be denoted as a PIE (position independent executable) which will enable ASLR for itself
+- While PIE is enabled by default on modern Linux distributions, it doesn't effectively patch this exploit
+- Because our jump uses relative addresses, PIE and ASLR aren't effective at stopping our injection. 
 - Antiviruses and tools can also check if entry points were modified
-- This is mostly for educational purposes nowadays
  
 # Takeaways
 - ELF’s design prioritizes performance over security
 - Small design choices can be exploited
 - Understanding how binary formats work is really important for understanding low-level security
+
  
