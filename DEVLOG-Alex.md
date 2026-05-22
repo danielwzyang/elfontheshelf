@@ -51,4 +51,8 @@ This document must be updated daily every time you finish a work session.
 ### 2026-05-20 - Script
 - Worked on script for presentation
 
+### 2026-05-21 - Script, Video podcast record
+- Finalised script for presentation
+- Recorded video podcast type thing for presentation
+
 
