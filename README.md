@@ -1,5 +1,7 @@
 # Elf on the Shelf
 
+### [Presentation Video](https://www.youtube.com/watch?v=WQjPLMcLimY)
+
 ### Advent of Coders
 
 Alex Shao, Daniel Yang, Owen Zeng
